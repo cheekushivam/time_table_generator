@@ -1,0 +1,21 @@
+{
+  "name": "time_table_generator",
+  "version": "1.0.0",
+  "description": "Time Table Generator REST APi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "Anshul Mehta",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "jsonwebtoken": "^8.1.1",
+    "mongoose": "^5.0.7",
+    "morgan": "^1.9.0",
+    "validator": "^9.4.1"
+  }
+}

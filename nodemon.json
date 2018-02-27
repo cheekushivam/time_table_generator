@@ -1,0 +1,7 @@
+{
+  "env": {
+    "MONGO_ATLAS_PW":"Cr@NK2114",
+    "JWT_KEY": "anSHul2114CraNK"
+
+  }
+}
