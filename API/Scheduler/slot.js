@@ -1,12 +1,17 @@
-
+/*jslint node: true */
 "use strict";
-class Slot{
-  slot(id,teacher_id,subject){
-    this.id =id;
-    this.teacher_id = teacher_id;
-    this.subject = subject
+// Have reference to class Class
+class Slot {
+  constructor(id, teacher_id = null, subject = null, Class = null) {
+    this.id = id;
+    this.Class = Class;
+    this.ClassName = ClassName;
   }
-  slot(){}
+  get className() {
+    return this.className;
+  }
+  set className(className) {
+    this.className = className;
+  }
 }
-
 module.exports = Slot;
