@@ -18,8 +18,8 @@ class Generator {
   constructor(Data) {
     this.firstList = [];
     this.newList = [];
-    this.Teachers = InitTeachers(Data.Teachers);
-    this.Sections = InitSections(Data.Sections);
+    this.Teachers = Data.Teacher.map(teacher => new Teacher(teacher.name, teacher.subjects, teacher.priorities));
+    this.Sections = Data.Sections.map(section => new Section(section.name, section.subjects));
     this.Period = [];
   }
   TeachertoSectionAlotter() {
@@ -35,12 +35,11 @@ class Generator {
   InitialPopulation() {
     for (let i = 0; i < populationSize; i++) {
       let slots = this.TeachertoSectionAlotter();
-      let Genes = [];
-      for (let j = 0; j < this.Sections.length; j++) {
-        Genes.push(new Gene(slots, this.Sections[i]));
-      }
+      let Genes = Array(this.Sections.length).fill().map(new Gene(slots, this.section[i]));
       this.firstList.push(new Chromosome(Genes));
     }
+    //sorting the population according to their fitness in descending order
+    this.firstList.sort((a, b) => b.fitness - a.fitness);
 
   }
 
@@ -56,19 +55,18 @@ class Generator {
       this.newList.concat(Utility.copy(this.firstList.splice(0, 11))); // Perform Elitism - stroring 1/10 of most fit chromosomes
 
       while (populationcounter < populationSize) {
-        let Parents = this.SUS(2);
+
+        let Parents = this.SUS(2); //Selecting Parents using Stochastic universal sampling
         let Father = Parents[0];
         let Mother = Parents[1];
-        let son = null;
-        if (Math.random(0, 1) < crossoverRate) {
-          son = this.crossover(Father, Mother);
-        } else {
-          son = Father;
-        }
+
+        //Creating a new Child from Parent chromosomes
+        let son = (Math.random(0, 1) < crossoverRate) ? this.crossover(Father, Mother) : Father;
+
         //Mutating a Gene of a son
         son = this.mutation(son);
 
-        if () { //condition to break loop if son staisfies Constraints
+        if (true) { //condition to break loop if son staisfies Constraints
 
           break;
         }
@@ -89,7 +87,7 @@ class Generator {
   }
   //Stochastic universal sampling for Parent Selection
   SUS(N) { // N: Number of offsprings to keep
-    let F = this.calculatePopulationFitness();
+    let F = this.firstList.reduce((acc, val) => acc += val);
     let P = Math.abs(F / N); //P: Distance between the roullete wheel pointers
     let start = Math.random(0, P);
     let pointers = [];
@@ -102,7 +100,7 @@ class Generator {
   // This method picks a parent by a chance of their probability
   RoulleteWheel(points) {
     let keep = [];
-    points.forEach(P, index) {
+    points.forEach((P, index) => {
       let i = 0;
       let currentFitness = 0;
       while (currentFitness < P) {
@@ -110,17 +108,7 @@ class Generator {
         i++;
       }
       keep.push(this.firstList[--i].fitness);
-    }
+    });
     return keep;
   }
-
-  calculatePopulationFitness() {
-    let totalFitness = 0;
-    this.firstList.forEach(chromose, index) {
-      totalFitness += chromose.fitness;
-    }
-    return totalFitness;
-  }
-
-
 }
