@@ -3,8 +3,7 @@
 const utility = require('../utility');
 class Teacher {
 
-  constructor(id, name, subjects, priorities) {
-    this.teacher_id = id;
+  constructor(name, subjects, priorities) {
     this.name = name;
     this.subjects = utility.copy(subjects);
     this.priorities = priorities;
@@ -12,9 +11,7 @@ class Teacher {
   get Name() {
     return this.name;
   }
-  get Teacher_id() {
-    return this.teacher_id;
-  }
+
   get Subjects() {
     return this.subjects;
   }

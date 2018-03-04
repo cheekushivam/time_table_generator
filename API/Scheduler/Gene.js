@@ -4,19 +4,22 @@
 const Slots = require('../slot');
 
 class Gene {
-  constructor(className) {
-    this.slots = [];
-    this.className = className || null;
+  constructor(SectionName, slots) {
+    this.Periods = this.PeriodSorter(slots);
+    this.SectionName = SectionName;
   }
 
-  asignSlots(slots) {
-
+  PeriodSorter(slots) {
+    let temp = [];
     slots.forEach((slot, index) => {
-      if (slot.className == this.className) {
-        this.slots.push(slot);
+      if (slot.SectionName == this.SectionName) {
+        this.temp.push(slot);
       }
     });
+
+    return temp;
   }
+
 }
 
 module.exports = Gene;

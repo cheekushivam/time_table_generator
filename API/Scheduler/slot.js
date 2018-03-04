@@ -1,17 +1,15 @@
 /*jslint node: true */
 "use strict";
+const utility = ('../utility');
 // Have reference to class Class
 class Slot {
-  constructor(id, teacher_id = null, subject = null, Class = null) {
-    this.id = id;
-    this.Class = Class;
-    this.ClassName = ClassName;
+  constructor(Period, SectionName) {
+    this.slots = this.SlotAllotment(Period, SectionName);
   }
-  get className() {
-    return this.className;
+  SlotAllotment(Period, SectionName) {
+    //allot slots Randomly
+    return this.slots;
   }
-  set className(className) {
-    this.className = className;
-  }
+
 }
 module.exports = Slot;
