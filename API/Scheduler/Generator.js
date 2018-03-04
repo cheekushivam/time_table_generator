@@ -55,7 +55,7 @@ class Generator {
   crossover(Father, Mother) {
 
   }
-
+  //Mutates the son
   mutation() {
 
   }
