@@ -1,7 +1,7 @@
 /*jslint node: true */
 "use strict";
 
-const Gene = require('../Gene');
+const Gene = require('../Scheduler/Gene');
 const utility = require('../utility');
 
 class Chromosome {

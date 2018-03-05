@@ -1,7 +1,7 @@
 /*jslint node: true */
 "use strict";
 
-const Slots = require('../slot');
+const Slots = require('../Scheduler/slot');
 
 class Gene {
   constructor(slots, SectionName) {

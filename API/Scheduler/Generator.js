@@ -2,12 +2,12 @@
 "use strict";
 //imports within package
 const Utility = require('../utility');
-const Gene = require('../Gene');
-const Chromosome = require('../chromosome');
-const Teacher = require('../teacher');
-const Section = require('../section');
-const Slot = require('../slot');
-const Period = require('../Period');
+const Gene = require('../Scheduler/Gene');
+const Chromosome = require('../Scheduler/chromosome');
+const Teacher = require('../Scheduler/teacher');
+const Section = require('../Scheduler/section');
+const Slot = require('../Scheduler/slot');
+const Period = require('../Scheduler/Period');
 //imports outside package
 const maxGenerations = Utility.maxGenerations;
 const crossoverRate = Utility.crossoverRate;
@@ -26,6 +26,7 @@ class Generator {
     this.WorkingTime = Data.totalPeriods;
     this.Periods = [];
   }
+
   TeachertoSectionAlotter(populationCounter) {
     //Create Slots
     if (populationCounter-- < 0) return;
@@ -49,6 +50,13 @@ class Generator {
     let Genes = this.Sections.map(section => new Gene(slot.slots, section.sectionName));
     this.firstList.push(new Chromosome(Genes, this.Sections, this.DaysDescription, this.totalPeriods));
     this.TeachertoSectionAlotter(populationCounter);
+  }
+  // Main method which start the process
+  generate() {
+    this.InitialPopulation();
+
+    let timetable = this.createNewGenerations();
+    return timetable;
   }
 
   //Creates the Very first population to start Genetic Algorithm
@@ -83,14 +91,16 @@ class Generator {
         //Mutating a Gene of a son
         son.mutation();
 
-        if (true) { //condition to break loop if son staisfies Constraints
-
-          break;
+        if (son.getfitness() > 0.999) { //condition to break loop if son staisfies Constraints
+          return son;
         }
         this.newList.push(son);
         newListFitness += son.getfitness();
         populationcounter++;
       }
+      this.firstList = this.newList;
+      this.newList = [];
+      this.firstList.sort((a, b) => b.fitness - a.fitness);
       generation++;
     }
   }
@@ -158,3 +168,5 @@ class Generator {
     return keep;
   }
 }
+
+module.exports = Generator;
