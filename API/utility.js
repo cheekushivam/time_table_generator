@@ -15,6 +15,7 @@
    mutationRate: 0.1,
    populationSize: 1000,
    maxGeneration: 100,
-   offSprings: 2
+   offSprings: 2,
+   suffler: 2
 
  };

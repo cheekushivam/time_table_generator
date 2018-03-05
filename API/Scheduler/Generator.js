@@ -7,30 +7,45 @@ const Chromosome = require('../chromosome');
 const Teacher = require('../teacher');
 const Section = require('../section');
 const Slot = require('../slot');
+const Period = require('../Period');
 //imports outside package
 const maxGenerations = Utility.maxGenerations;
 const crossoverRate = Utility.crossoverRate;
 const mutationRate = Utility.mutationRate;
 const populationSize = Utility.populationSize;
 const offSprings = Utility.offSprings;
+const Suffler = Utility.Suffler;
 
 class Generator {
 
   constructor(Data) {
     this.firstList = [];
     this.newList = [];
-    this.Teacher = Data.Teachers;
+    this.Teachers = Data.Teachers;
     this.Sections = Data.Sections;
-    this.Period = [];
+    this.WorkingTime = Data.totalPeriods;
+    this.Periods = [];
   }
   TeachertoSectionAlotter(populationCounter) {
     //Create Slots
     if (populationCounter-- < 0) return;
 
     //generate Slots
+    this.sections.forEach((section, index) => {
 
+      this.Teachers.forEach((teacher, m) => {
+        section.subjects.forEach((subject, i) => {
+          let Tsubjects = teacher.subjects;
+          if (Tsubjects.contains(subject.subjectName) && (!this.Periods.some(period => period.teacher === teacher) || subject.isLab)) {
+            this.Periods.push(new Period(section.SectionName, subject, teacher));
+            return;
+          }
+
+        });
+      });
+    });
     //Generating a slot ,creating Genes and by those making a new chromose and pushing it to the list
-    let slot = new Slot(this.Period, this.Sections);
+    let slot = new Slot(this.Period, this.Sections, this.totalPeriods);
     let Genes = this.Sections.map(section => new Gene(slot.slots, section));
     this.firstList.push(new Chromosome(Genes));
     this.TeachertoSectionAlotter(populationCounter);
@@ -66,7 +81,7 @@ class Generator {
         let son = (Math.random(0, 1) < crossoverRate) ? this.crossover(Father, Mother) : Father;
 
         //Mutating a Gene of a son
-        son = this.mutation(son);
+        son.mutation();
 
         if (true) { //condition to break loop if son staisfies Constraints
 
@@ -81,12 +96,37 @@ class Generator {
   }
 
   crossover(Father, Mother) {
-
+    let index = Math.floor(Math.random(0, this.Sections.length));
+    let FatherGene1 = Utility.copy(Father.Genes[index].splice(0, Father.Genes[index].length / 2));
+    let FatherGene2 = Utility.copy(Father.Genes[index]);
+    //Father.Gene[index] = Utility.copy(Mother.Gene[index].splice(0, Mother.Gene[index].length / 2));
+    let MotherGene1 = Utility.copy(Mother.Genes[index].splice(0, Mother.Genes[index].length / 2));
+    let MotherGene2 = Utility.copy(Mother.Genes[index]);
+    Father.Genes[index] = FatherGene1.concat(MotherGene2);
+    Mother.Genes[index] = FatherGene2.concat(MotherGene1);
+    return (Father.getfitness() > Mother.getfitness()) ? Father : Mother;
   }
   //Mutates the son
   mutation() {
-
+    let son = this;
+    let indexes = [];
+    for (let i = 0; i < Suffler; i++) {
+      indexes.push(this.suffleIndex(son.Genes));
+    }
+    indexes.forEach((index, i) => {
+      let suffleIndex = this.suffleIndex(son.Genes[index]);
+      let tempGene = son.Gene[suffleIndex];
+      let nextSuffleIndex = this.suffleIndex(son.Gene[index]);
+      son.Genes[suffleIndex] = son.Genes[nextSuffleIndex];
+      son.Genes[nextSuffleIndex] = tempGene;
+    });
+    return son;
   }
+  //Suporter function to generate random index for swapping
+  suffleIndex(object) {
+    return Math.floor(Math.random(0, object.length));
+  }
+
   //Stochastic universal sampling for Parent Selection
   SUS(N) { // N: Number of offsprings to keep
     let F = this.firstList.reduce((acc, val) => acc += val.fitness, 0);
