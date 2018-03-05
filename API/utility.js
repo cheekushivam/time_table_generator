@@ -11,9 +11,10 @@
      }
      return output;
    },
-   crossoverRate: 1.0,
+   crossoverRate: 0.5,
    mutationRate: 0.1,
    populationSize: 1000,
-   maxGeneration: 100
+   maxGeneration: 100,
+   offSprings: 2
 
  };

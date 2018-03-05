@@ -12,33 +12,36 @@ const maxGenerations = Utility.maxGenerations;
 const crossoverRate = Utility.crossoverRate;
 const mutationRate = Utility.mutationRate;
 const populationSize = Utility.populationSize;
+const offSprings = Utility.offSprings;
 
 class Generator {
 
   constructor(Data) {
     this.firstList = [];
     this.newList = [];
-    this.Teachers = Data.Teacher.map(teacher => new Teacher(teacher.name, teacher.subjects, teacher.priorities));
-    this.Sections = Data.Sections.map(section => new Section(section.name, section.subjects));
+    this.Teacher = Data.Teachers;
+    this.Sections = Data.Sections;
     this.Period = [];
   }
-  TeachertoSectionAlotter() {
+  TeachertoSectionAlotter(populationCounter) {
     //Create Slots
+    if (populationCounter-- < 0) return;
 
     //generate Slots
 
+    //Generating a slot ,creating Genes and by those making a new chromose and pushing it to the list
     let slot = new Slot(this.Period, this.Sections);
-    return slot.slots;
+    let Genes = this.Sections.map(section => new Gene(slot.slots, section));
+    this.firstList.push(new Chromosome(Genes));
+    this.TeachertoSectionAlotter(populationCounter);
   }
 
   //Creates the Very first population to start Genetic Algorithm
   InitialPopulation() {
-    for (let i = 0; i < populationSize; i++) {
-      let slots = this.TeachertoSectionAlotter();
-      let Genes = Array(this.Sections.length).fill().map(new Gene(slots, this.section[i]));
-      this.firstList.push(new Chromosome(Genes));
-    }
+
+    this.TeachertoSectionAlotter(populationSize);
     //sorting the population according to their fitness in descending order
+
     this.firstList.sort((a, b) => b.fitness - a.fitness);
 
   }
@@ -52,13 +55,12 @@ class Generator {
       let populationcounter = 0; // Keeping Track of population Number
       let newListFitness = 0;
 
-      this.newList.concat(Utility.copy(this.firstList.splice(0, 11))); // Perform Elitism - stroring 1/10 of most fit chromosomes
+      this.newList.concat(Utility.copy(this.firstList.splice(0, 10))); // Perform Elitism - stroring 1/10 of most fit chromosomes
 
       while (populationcounter < populationSize) {
 
-        let Parents = this.SUS(2); //Selecting Parents using Stochastic universal sampling
-        let Father = Parents[0];
-        let Mother = Parents[1];
+        //Selecting Parents using Stochastic universal sampling
+        let Father, Mother = this.SUS(offSprings);
 
         //Creating a new Child from Parent chromosomes
         let son = (Math.random(0, 1) < crossoverRate) ? this.crossover(Father, Mother) : Father;
@@ -87,14 +89,18 @@ class Generator {
   }
   //Stochastic universal sampling for Parent Selection
   SUS(N) { // N: Number of offsprings to keep
-    let F = this.firstList.reduce((acc, val) => acc += val);
-    let P = Math.abs(F / N); //P: Distance between the roullete wheel pointers
+    let F = this.firstList.reduce((acc, val) => acc += val.fitness, 0);
+    let P = F / N; //P: Distance between the roullete wheel pointers
     let start = Math.random(0, P);
     let pointers = [];
     for (let i = 0; i < N; i++) {
       pointers.push(start + i * P);
     }
-    return this.RoulleteWheel(pointers);
+    let Parents = this.RoulleteWheel(pointers); //Selecting Parents using Stochastic universal sampling
+    let Father = Parents[0];
+    let Mother = Parents[1];
+
+    return { Father: Father, Mother: Mother };
 
   }
   // This method picks a parent by a chance of their probability

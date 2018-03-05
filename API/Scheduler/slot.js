@@ -3,11 +3,12 @@
 const utility = ('../utility');
 // Have reference to class Class
 class Slot {
-  constructor(Period, SectionName) {
-    this.slots = this.SlotAllotment(Period, SectionName);
+  constructor(Period, Section) {
+    this.slots = this.SlotAllotment(Period, Section);
   }
-  SlotAllotment(Period, SectionName) {
+  SlotAllotment(Period, Section) {
     //allot slots Randomly
+
     return this.slots;
   }
 
