@@ -46,8 +46,8 @@ class Generator {
     });
     //Generating a slot ,creating Genes and by those making a new chromose and pushing it to the list
     let slot = new Slot(this.Period, this.Sections, this.totalPeriods);
-    let Genes = this.Sections.map(section => new Gene(slot.slots, section));
-    this.firstList.push(new Chromosome(Genes));
+    let Genes = this.Sections.map(section => new Gene(slot.slots, section.sectionName));
+    this.firstList.push(new Chromosome(Genes, this.Sections, this.DaysDescription, this.totalPeriods));
     this.TeachertoSectionAlotter(populationCounter);
   }
 
