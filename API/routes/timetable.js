@@ -9,7 +9,8 @@ router.get('/', (req, res, next) => {
   });
 });
 router.post('/', (req, res, next) => {
-  let timetable = new Generator(Data);
+  let data = new Data();
+  let timetable = new Generator(data.getDatafromJSON(req.body));
   let final_table = timetable.generate();
   res.status(200).json({
     timetable: final_table

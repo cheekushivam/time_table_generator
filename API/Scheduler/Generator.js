@@ -23,19 +23,22 @@ class Generator {
     this.newList = [];
     this.Teachers = Data.Teachers;
     this.Sections = Data.Sections;
-    this.WorkingTime = Data.totalPeriods;
+    this.totalPeriods = Data.totalPeriods;
     this.Periods = [];
   }
 
   TeachertoSectionAlotter(populationCounter) {
+    console.log("Entered TeachertoSectionAlotter class");
     //Create Slots
     if (populationCounter-- < 0) return;
 
     //generate Slots
-    this.sections.forEach((section, index) => {
-
+    this.Sections.forEach((section, index) => {
+      console.log("Entered Sections forEach loop");
       this.Teachers.forEach((teacher, m) => {
+        console.log("Entered Teachers forEach loop");
         section.subjects.forEach((subject, i) => {
+          console.log("Entered subjects forEach loop");
           let Tsubjects = teacher.subjects;
           if (Tsubjects.contains(subject.subjectName) && (!this.Periods.some(period => period.teacher === teacher) || subject.isLab)) {
             this.Periods.push(new Period(section.SectionName, subject, teacher));
@@ -53,6 +56,13 @@ class Generator {
   }
   // Main method which start the process
   generate() {
+    console.log("Logging Sections");
+    console.log(this.sections);
+    console.log("Logging Teachers");
+    console.log(this.Teachers);
+    console.log("Logging totalPeriods");
+    console.log(this.totalPeriods);
+    console.log("Entered Generator classs - inside generate");
     this.InitialPopulation();
 
     let timetable = this.createNewGenerations();
