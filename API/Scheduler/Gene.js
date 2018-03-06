@@ -4,9 +4,10 @@
 const Slots = require('../Scheduler/slot');
 
 class Gene {
-  constructor(slots, SectionName) {
-    this.Periods = slots.filter((slot) => slot.SectionName == SectionName);
-    this.SectionName = SectionName;
+  constructor() {}
+  GeneCreator(slots, SectionName) {
+    return slots.filter(slot => slot.section == SectionName).map(period => new Object({ "name": period.section, "subject": period.subject, "teacher": period.teacher }));
+
   }
 }
 

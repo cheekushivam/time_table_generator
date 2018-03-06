@@ -1,23 +1,16 @@
 /*jslint node: true */
-"use strict";
+//"use strict";
 class Section {
 
-  cosntructor(sectionName, subjects) {
+  constructor(sectionName, subjects) {
+    console.log("Entered Section class");
+    //  console.log("Recieved sectionName- " + typeof sectionName + "  subjects- " + typeof subjects);
     this.sectionName = sectionName;
+    //console.log("sectionName-" + typeof this.sectionName);
     this.subjects = subjects;
+    //console.log("subjects- " + this.subjects);
   }
-  get sectionName() {
-    return this.sectionName;
-  }
-  set sectionName(sectionName) {
-    this.sectionName = sectionName;
-  }
-  get subjects() {
-    return this.subjects;
-  }
-  set subjects(subjects) {
-    this.subjects = subjects;
-  }
+
 }
 
 module.exports = Section;

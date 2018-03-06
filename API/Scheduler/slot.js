@@ -4,28 +4,41 @@ const utility = ('../utility');
 // Have reference to class Class
 class Slot {
   constructor(Periods, Sections, totalPeriods) {
-    this.WorkingTime = WorkingTime;
+    console.log("Entered");
+    this.totalPeriods = totalPeriods;
     this.slots = this.SlotAllotment(Periods, Sections);
   }
   SlotAllotment(Periods, Sections) {
     let slots = [];
-    Sections.forEach((section, index) => {
+    for (let section of Sections) {
+      //  console.log("here--");
+
       let AssignedTeachers = [];
-      Periods.forEach((Period, i) => {
-        if (Period.SectionName === section.SectionName) {
+      for (let Period of Periods) {
+        //  console.log(Period);
+        //  console.log("here++");
+        if (Period.section === section.name) {
           AssignedTeachers.push(Period);
         }
-      });
-      let slot = Array(this.totalPeriods).fill().map(Math.random(AssignedTeachers));
-      slots.concat(slot);
-    });
+      }
+      let slot = this.generateSlots(AssignedTeachers);
+      //console.log("one slot count " + slot.length);
+      //console.log(slot);
+      slots = slots.concat(slot);
+    }
     //allot slots Randomly
-
-    return slots.shuffle();
+    //  console.log("slot Count" + slots.length);
+    return this.shuffle(slots);
   }
 
-  shuffle() {
-    var input = this;
+  generateSlots(AssignedTeachers) {
+    return Array(this.totalPeriods).fill().map(() => {
+      let index = Math.floor(Math.random() * AssignedTeachers.length);
+      return AssignedTeachers[index];
+    });
+  }
+  shuffle(slots) {
+    var input = slots;
 
     for (var i = input.length - 1; i >= 0; i--) {
 
