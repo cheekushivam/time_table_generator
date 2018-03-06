@@ -51,7 +51,7 @@ class Chromosome {
         }
       }
     }
-    console.log("Finished" + this.constraints_per_day.name);
+    //console.log("Finished" + this.constraints_per_day.name);
     return fitness;
   }
   max_period_per_week(Genes, subject) {
@@ -68,7 +68,7 @@ class Chromosome {
     } else if (maxSubjectCount > utility.max_periods_per_week) {
       fitness--;
     }
-    console.log("Finished: " + this.max_period_per_week.name);
+    //  console.log("Finished: " + this.max_period_per_week.name);
     return fitness;
   }
   Teacher_priority(teacher, periodno) {
@@ -76,28 +76,19 @@ class Chromosome {
     if (teacher.priority === periodno) {
       fitness += 2;
     }
-    console.log("Finished: " + this.Teacher_priority.name);
+    // console.log("Finished: " + this.Teacher_priority.name);
     return fitness;
   }
   Lab_constraint(Section_subjects, day, periodno, period) {
     let fitness = 0;
     for (let subjectg of Section_subjects) {
-      console.log("----");
       if (periodno >= day.length - 1) return fitness--;
-      console.log(day.length);
       if (subjectg.isLab) {
-        console.log("------------------------------------>read me " + period.subject.subjectName);
-        let condition = false;
-        try {
-          condition = period.subject.subjectName == subjectg.subjectName && day[periodno + 1].subject.subjectName == subjectg.subjectName;
-        } catch (err) {
-          throw new Error(err);
-        }
-        console.log(condition);
+        let condition = period.subject.subjectName == subjectg.subjectName && day[periodno + 1].subject.subjectName == subjectg.subjectName;
         fitness = (condition) ? fitness + 2 : fitness--;
       }
     }
-    console.log("Finished: " + this.Lab_constraint.name);
+    //  console.log("Finished: " + this.Lab_constraint.name);
     return fitness;
   }
 
@@ -105,18 +96,14 @@ class Chromosome {
     let fitness = 0;
     for (let j = 0; j < totalPeriods; j++) {
       let geneGroup = [];
-      console.log("First loop");
+
       for (let i = 0; i < Genes.length; i++) {
-        console.log("second loop");
-        //  console.log(this.Genes[i][j]);
+
         if (Genes[i][j] != null)
           geneGroup.push(Genes[i].Periods[j]);
       }
-
       let matched = false;
-      console.log("third loop");
       for (let k = 0; k < geneGroup.length; k++) {
-        console.log("fourth loop");
         for (let t = 0; t < geneGroup.length; t++) {
 
           if (geneGroup[k].teacher.name == geneGroup[t].teacher.name) {
@@ -124,12 +111,12 @@ class Chromosome {
             break;
           }
         }
-        console.log("matched :" + matched);
+
         fitness = matched ? fitness-- : fitness += 2;
 
       }
     }
-    console.log("Finished: " + this.TeacherCollision.name);
+    //  console.log("Finished: " + this.TeacherCollision.name);
     return fitness;
   }
 
@@ -148,8 +135,8 @@ class Chromosome {
       let temp = myGene1.splice(0, DaysDescription[k++].Period);
       myGene.push(copy(temp));
     } while (myGene1.length > 0);
-    console.log("------------------------->Iterting for " + myGene[0][0].name);
-    console.log("Finished: " + this.GeneFinder.name);
+    // console.log("------------------------->Iterting for " + myGene[0][0].name);
+    // console.log("Finished: " + this.GeneFinder.name);
     return myGene;
   }
 

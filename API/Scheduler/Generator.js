@@ -92,23 +92,26 @@ class Generator {
     console.log("Entered " + this.createNewGenerations.name);
     let generation = 0; // Keeping track of Generation Number
     while (generation <= maxGenerations) {
-      console.log("Cureent Generation-------> " + generation);
+      console.log("Cureent Generation------------------------------------> " + generation);
       let populationcounter = 0; // Keeping Track of population Number
       let newListFitness = 0;
 
       this.newList.concat(copy(this.firstList.splice(0, 10))); // Perform Elitism - stroring 1/10 of most fit chromosomes
       while (populationcounter < populationSize) {
-        console.log("Cureent population-------> " + populationcounter);
+        console.log("Cureent population---------------> " + populationcounter);
         //Selecting Parents using Stochastic universal sampling
-        let Father, Mother = this.SUS(offSprings);
+
+        let Parents = this.SUS(offSprings);
+        let Father = Parents.Father;
+        let Mother = Parents.Mother;
 
         //Creating a new Child from Parent chromosomes
-        let son = (Math.random(0, 1) < crossoverRate) ? this.crossover(Father, Mother) : Father;
-
+        let son = this.crossover(Father, Mother); //(Math.random(0, 1) < crossoverRate) ? this.crossover(Father, Mother) : Father;
         //Mutating a Gene of a son
-        son.mutation();
+        this.mutation(son);
 
-        if (son.getfitness() > 0.999) { //condition to break loop if son staisfies Constraints
+        if (son.getfitness() > 0.999 || generation >= maxGenerations) { //condition to break loop if son staisfies Constraints
+          console.log("Here");
           return son;
         }
         this.newList.push(son);
@@ -121,24 +124,25 @@ class Generator {
 
       generation++;
     }
-    console.log("Finished " + this.createNewGenerations.name);
+    //  console.log("Finished " + this.createNewGenerations.name);
   }
 
   crossover(Father, Mother) {
     let index = Math.floor(Math.random(0, this.Sections.length));
     let FatherGene1 = copy(Father.Genes[index].splice(0, Father.Genes[index].length / 2));
     let FatherGene2 = copy(Father.Genes[index]);
+
     //Father.Gene[index] = copy(Mother.Gene[index].splice(0, Mother.Gene[index].length / 2));
     let MotherGene1 = copy(Mother.Genes[index].splice(0, Mother.Genes[index].length / 2));
     let MotherGene2 = copy(Mother.Genes[index]);
     Father.Genes[index] = FatherGene1.concat(MotherGene2);
     Mother.Genes[index] = FatherGene2.concat(MotherGene1);
     console.log("Finished " + this.crossover.name);
+
     return (Father.getfitness() > Mother.getfitness()) ? Father : Mother;
   }
   //Mutates the son
-  mutation() {
-    let son = this;
+  mutation(son) {
     let indexes = [];
     for (let i = 0; i < Suffler; i++) {
       indexes.push(this.suffleIndex(son.Genes));
@@ -185,7 +189,7 @@ class Generator {
         currentFitness += this.firstList[i].fitness;
         i++;
       }
-      keep.push(this.firstList[--i].fitness);
+      keep.push(this.firstList[--i]);
     });
     console.log("Finished " + this.RoulleteWheel.name);
     return keep;

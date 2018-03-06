@@ -1,6 +1,6 @@
  module.exports = {
 
-   crossoverRate: 0.5,
+   crossoverRate: 0.1,
    mutationRate: 0.1,
    populationSize: 1000,
    maxGeneration: 100,
