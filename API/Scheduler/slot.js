@@ -4,7 +4,7 @@ const utility = ('../utility');
 // Have reference to class Class
 class Slot {
   constructor(Periods, Sections, totalPeriods) {
-    console.log("Entered");
+    //  console.log("Entered");
     this.totalPeriods = totalPeriods;
     this.slots = this.SlotAllotment(Periods, Sections);
   }

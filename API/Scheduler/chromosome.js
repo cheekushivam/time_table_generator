@@ -2,10 +2,11 @@
 "use strict";
 
 const utility = require('../utility');
-
+let fitness_inc = 1;
+let fitness_dec = 0;
 class Chromosome {
   constructor(Genes, Sections, DaysDescription, totalPeriods) {
-    console.log("Entered chromosome");
+    //console.log("Entered chromosome");
     this.Genes = Genes;
     this.Sections = Sections;
     this.DaysDescription = DaysDescription;
@@ -18,9 +19,10 @@ class Chromosome {
     fitness += this.constraints_per_day(copy(this.Genes), copy(this.Sections), copy(this.DaysDescription));
     // Teachers clash at same period - Hard Constraint
     fitness += this.TeacherCollision(copy(this.Genes), copy(this.totalPeriods));
-    console.log("Exit");
+    //  console.log("Exit");
+    fitness = 1 - (fitness / ((this.Genes.length) * this.totalPeriods));
     console.log(fitness);
-    return 1 / fitness;
+    return fitness;
   }
   constraints_per_day(Genes, Sections, DaysDescription) {
     let fitness = 0;
@@ -41,10 +43,10 @@ class Chromosome {
         for (let subject of section.subjects) {
 
           if (subject.periodLock != -1) {
-            fitness = (findLock(day, subject)) ? fitness + 1 : fitness - 1;
+            fitness = (findLock(day, subject)) ? fitness + fitness_inc : fitness - fitness_dec;
           }
           //Max period exceed per day - Hard Constraint
-          fitness = (subjectCount(day, subject) < utility.max_periods_per_day) ? fitness + 1 : fitness - 1;
+          fitness = (subjectCount(day, subject) < utility.max_periods_per_day) ? fitness + fitness_inc : fitness - fitness_dec;
 
           //Max period exceed per week - Hard Constraint
           fitness += this.max_period_per_week(Genes, subject);
@@ -64,17 +66,18 @@ class Chromosome {
     let maxSubjectCount = subjectCount(GenePool, subject);
 
     if (maxSubjectCount == utility.max_periods_per_week) {
-      fitness += 2;
+      fitness += fitness_inc;
     } else if (maxSubjectCount > utility.max_periods_per_week) {
-      fitness--;
+      fitness -= fitness_dec;
     }
     //  console.log("Finished: " + this.max_period_per_week.name);
     return fitness;
   }
   Teacher_priority(teacher, periodno) {
     let fitness = 0;
-    if (teacher.priority === periodno) {
-      fitness += 2;
+    if (teacher.priority == 0) return fitness + fitness_dec;
+    if (teacher.priority - 1 === periodno) {
+      fitness += fitness_inc;
     }
     // console.log("Finished: " + this.Teacher_priority.name);
     return fitness;
@@ -82,10 +85,10 @@ class Chromosome {
   Lab_constraint(Section_subjects, day, periodno, period) {
     let fitness = 0;
     for (let subjectg of Section_subjects) {
-      if (periodno >= day.length - 1) return fitness--;
+      if (periodno >= day.length - 1) return fitness -= fitness_dec;
       if (subjectg.isLab) {
         let condition = period.subject.subjectName == subjectg.subjectName && day[periodno + 1].subject.subjectName == subjectg.subjectName;
-        fitness = (condition) ? fitness + 2 : fitness--;
+        fitness = (condition) ? fitness + fitness_inc : fitness -= fitness_dec;
       }
     }
     //  console.log("Finished: " + this.Lab_constraint.name);
@@ -112,7 +115,7 @@ class Chromosome {
           }
         }
 
-        fitness = matched ? fitness-- : fitness += 2;
+        fitness = matched ? fitness -= fitness_dec : fitness += fitness_inc;
 
       }
     }

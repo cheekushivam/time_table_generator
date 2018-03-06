@@ -29,8 +29,8 @@ class Generator {
   }
 
   TeachertoSectionAlotter(populationCounter) {
-    console.log("Entered TeachertoSectionAlotter class");
-    console.log("population Counter:" + populationCounter);
+    //  console.log("Entered TeachertoSectionAlotter class");
+    //console.log("population Counter:" + populationCounter);
     //Create Slots
     if (populationCounter-- < 0) return 1;
 
@@ -41,9 +41,9 @@ class Generator {
           //console.log(subject);
           var Tsubjects = teacher.subjects;
 
-          var condition = Tsubjects.includes(subject.subjectName) && (!this.Periods.some(period => period.subject.subjectName === subject.subjectName) || subject.isLab);
+          var condition = Tsubjects.includes(subject.subjectName) && (this.doesPeriodMatch(this.Periods, subject) || subject.isLab);
           if (condition) {
-            console.log("Period Found");
+            //console.log("Period Found");
             this.Periods.push({
               "section": section.name,
               "subject": subject,
@@ -57,8 +57,8 @@ class Generator {
 
     //Generating a slot ,creating Genes and by those making a new chromose and pushing it to the list
     let slot = new Slot(this.Periods, this.Sections, this.totalPeriods);
-    console.log("Inside TeachertoSectionAlotter - slot allotment done");
-    console.log("Generator slot");
+    //  console.log("Inside TeachertoSectionAlotter - slot allotment done");
+    //  console.log("Generator slot");
     //console.log(slot);
     let myGene = new Gene();
     let Genes = this.Sections.map(section => myGene.GeneCreator(slot.slots, section.name)); // Gene obkject tha
@@ -83,46 +83,61 @@ class Generator {
     //sorting the population according to their fitness in descending order
 
     this.firstList.sort((a, b) => b.fitness - a.fitness);
-    console.log("Exit " + this.InitialPopulation.name);
+    //  console.log("Exit " + this.InitialPopulation.name);
 
   }
 
   //Creates New Generations to Evolve the TimeTable
   createNewGenerations() {
-    console.log("Entered " + this.createNewGenerations.name);
+    //console.log("Entered " + this.createNewGenerations.name);
     let generation = 0; // Keeping track of Generation Number
     while (generation <= maxGenerations) {
-      console.log("Cureent Generation------------------------------------> " + generation);
+
       let populationcounter = 0; // Keeping Track of population Number
       let newListFitness = 0;
 
       this.newList.concat(copy(this.firstList.splice(0, 10))); // Perform Elitism - stroring 1/10 of most fit chromosomes
       while (populationcounter < populationSize) {
+        console.log("Cureent Generation------------------------------------> " + generation);
         console.log("Cureent population---------------> " + populationcounter);
         //Selecting Parents using Stochastic universal sampling
 
         let Parents = this.SUS(offSprings);
+        //  console.log("here");
         let Father = Parents.Father;
         let Mother = Parents.Mother;
 
         //Creating a new Child from Parent chromosomes
-        let son = this.crossover(Father, Mother); //(Math.random(0, 1) < crossoverRate) ? this.crossover(Father, Mother) : Father;
+        let son = (Math.random(0, 1) < crossoverRate) ? this.crossover(Father, Mother) : Father;
         //Mutating a Gene of a son
         this.mutation(son);
-
-        if (son.getfitness() > 0.999 || generation >= maxGenerations) { //condition to break loop if son staisfies Constraints
-          console.log("Here");
+        // console.log("SON Gene");
+        // console.log(son.Genes);
+        // console.log(son.Genes[0].length);
+        // console.log(son.Genes[1].length);
+        if (son.getfitness() > 0.9 || generation >= maxGenerations) { //condition to break loop if son staisfies Constraints
+          console.log(" ");
+          console.log(" ");
+          console.log(" ");
+          console.log(" ");
+          console.log("--------------------------------------------------------------------------");
+          console.log("optimal TimeTable According to given Parameters is found at Generation: " + generation + "  Population Number: " + populationcounter + "  with a fitness of :" + son.getfitness());
+          console.log("The Time Table: ");
+          console.log(son.Genes);
           return son;
         }
         this.newList.push(son);
         newListFitness += son.getfitness();
+        //  console.log("Cureent generation Fitness:" + newListFitness);
         populationcounter++;
       }
       this.firstList = this.newList;
       this.newList = [];
       this.firstList.sort((a, b) => b.fitness - a.fitness);
-
+      //  console.log(this.firstList[0]);
       generation++;
+      //return;
+
     }
     //  console.log("Finished " + this.createNewGenerations.name);
   }
@@ -137,7 +152,7 @@ class Generator {
     let MotherGene2 = copy(Mother.Genes[index]);
     Father.Genes[index] = FatherGene1.concat(MotherGene2);
     Mother.Genes[index] = FatherGene2.concat(MotherGene1);
-    console.log("Finished " + this.crossover.name);
+    //  console.log("Finished " + this.crossover.name);
 
     return (Father.getfitness() > Mother.getfitness()) ? Father : Mother;
   }
@@ -154,12 +169,12 @@ class Generator {
       son.Genes[suffleIndex] = son.Genes[nextSuffleIndex];
       son.Genes[nextSuffleIndex] = tempGene;
     });
-    console.log("Finished " + this.mutation.name);
+    //  console.log("Finished " + this.mutation.name);
     return son;
   }
   //Suporter function to generate random index for swapping
   suffleIndex(object) {
-    console.log("Finished " + this.suffleIndex.name);
+    //console.log("Finished " + this.suffleIndex.name);
     return Math.floor(Math.random(0, object.length));
   }
 
@@ -175,7 +190,7 @@ class Generator {
     let Parents = this.RoulleteWheel(pointers); //Selecting Parents using Stochastic universal sampling
     let Father = Parents[0];
     let Mother = Parents[1];
-    console.log("Finished " + this.SUS.name);
+    //  console.log("Finished " + this.SUS.name);
     return { Father: Father, Mother: Mother };
 
   }
@@ -191,8 +206,11 @@ class Generator {
       }
       keep.push(this.firstList[--i]);
     });
-    console.log("Finished " + this.RoulleteWheel.name);
+    //  console.log("Finished " + this.RoulleteWheel.name);
     return keep;
+  }
+  doesPeriodMatch(Periods, subject) {
+    return !Periods.some(period => period.subject.subjectName === subject.subjectName);
   }
 }
 
