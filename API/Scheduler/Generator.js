@@ -105,7 +105,7 @@ class Generator {
         //Mutating a Gene of a son
         this.mutation(son);
         let son_fitness = son.getfitness();
-
+        if (son_fitness < 0) return ("Bhai timetable kaise banau tu chutiya hai");
         let similar_fitness = similar_offsprings(this.newList, son_fitness);
         if (similar_fitness > populationSize / 5) {
           adjuster += threshold / ((populationSize + 1) * similar_fitness / generation) * 15;
@@ -179,7 +179,6 @@ class Generator {
     let Parents = this.RoulleteWheel(pointers); //Selecting Parents using Stochastic universal sampling
     let Father = Parents[0];
     let Mother = Parents[1];
-
     return { Father: Father, Mother: Mother };
 
   }
@@ -191,8 +190,14 @@ class Generator {
       let currentFitness = 0;
       while (currentFitness < P && i < this.firstList.length - 1) {
         currentFitness += this.firstList[i++].fitness;
+        //  console.log(i);
       }
-      keep.push(this.firstList[--i]);
+      if (i != 0) {
+        --i;
+      }
+      let p = this.firstList[i];
+      //console.log(p);
+      keep.push(p);
     }
     return keep;
   }
