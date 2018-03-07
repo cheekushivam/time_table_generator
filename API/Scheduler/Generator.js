@@ -119,8 +119,8 @@ class Generator {
           console.log("--------------------------------------------------------------------------");
           console.log("optimal TimeTable According to given Parameters is found at Generation: " + generation + "  Population Number: " + populationcounter + "  with a fitness of :" + son.getfitness());
           console.log("The Time Table: ");
-          console.log(son.Genes);
-          return son.Genes;
+          return this.finalResultGenerator(son.Genes);
+
         }
         this.newList.push(son);
         newListFitness += son.getfitness();
@@ -198,6 +198,28 @@ class Generator {
   }
   doesPeriodMatch(Periods, subject) {
     return !Periods.some(period => period.subject.subjectName === subject.subjectName);
+  }
+  finalResultGenerator(Genes) {
+    let timetable = [];
+
+    for (let gene of Genes) {
+
+      let t = 0;
+      let periods = gene.map(period => {
+        let index = gene.indexOf(period);
+        let periodno = (index % this.DaysDescription[t].Period) + 1;
+        if (periodno == 1 && index != 0) {
+          t++;
+        }
+
+        return new Object({ "period": periodno, "subject": period.subject.subjectName, "teacher": period.teacher.name });
+      });
+
+      timetable.push({ "sectionName": gene[0].name, "periods": periods });
+    }
+
+    console.log(timetable);
+    return timetable;
   }
 }
 
