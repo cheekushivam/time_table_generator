@@ -1,7 +1,5 @@
 /*jslint node: true */
 //"use strict";
-const Teacher = require('../Scheduler/teacher');
-const Section = require('../Scheduler/section');
 class Data {
   constructor() { console.log("Entered Data class"); }
 

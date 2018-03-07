@@ -6,7 +6,6 @@ let fitness_inc = 1;
 let fitness_dec = 0;
 class Chromosome {
   constructor(Genes, Sections, DaysDescription, totalPeriods) {
-    //console.log("Entered chromosome");
     this.Genes = Genes;
     this.Sections = Sections;
     this.DaysDescription = DaysDescription;
@@ -19,9 +18,7 @@ class Chromosome {
     fitness += this.constraints_per_day(this.Genes, this.Sections, this.DaysDescription);
     // Teachers clash at same period - Hard Constraint
     fitness += this.TeacherCollision(this.Genes, copy(this.totalPeriods));
-    //  console.log("Exit");
     fitness = 1 - (fitness / ((this.Genes.length) * this.totalPeriods));
-    //  console.log(fitness);
     return fitness;
   }
   constraints_per_day(Genes, Sections, DaysDescription) {
@@ -36,7 +33,6 @@ class Chromosome {
           let teacher = period.teacher;
           fitness += this.Teacher_priority(teacher, periodno);
           // To find lab constraints - Hard Constraint
-          //let Section_subjects = ;
           fitness += this.Lab_constraint(section.subjects, day, periodno, period);
         }
         // To find that periodLock is satisfied or not - Hard Constraint
@@ -53,7 +49,6 @@ class Chromosome {
         }
       }
     }
-    //console.log("Finished" + this.constraints_per_day.name);
     return fitness;
   }
   max_period_per_week(Genes, subject) {
@@ -68,7 +63,6 @@ class Chromosome {
     } else if (maxSubjectCount > utility.max_periods_per_week) {
       fitness -= fitness_dec;
     }
-    //  console.log("Finished: " + this.max_period_per_week.name);
     return fitness;
   }
   Teacher_priority(teacher, periodno) {
@@ -77,7 +71,6 @@ class Chromosome {
     if (teacher.priority - 1 === periodno) {
       fitness += fitness_inc;
     }
-    // console.log("Finished: " + this.Teacher_priority.name);
     return fitness;
   }
   Lab_constraint(Section_subjects, day, periodno, period) {
@@ -92,7 +85,6 @@ class Chromosome {
         }
       }
     }
-    //  console.log("Finished: " + this.Lab_constraint.name);
     return fitness;
   }
 
@@ -103,10 +95,13 @@ class Chromosome {
 
       for (let i = 0; i < Genes.length; i++) {
 
-        if (Genes[i][j] != null)
+        if (Genes[i][j] != null) {
           geneGroup.push(Genes[i].Periods[j]);
+        }
       }
+
       let matched = false;
+
       for (let k = 0; k < geneGroup.length; k++) {
         for (let t = 0; t < geneGroup.length; t++) {
 
@@ -120,7 +115,6 @@ class Chromosome {
 
       }
     }
-    //  console.log("Finished: " + this.TeacherCollision.name);
     return fitness;
   }
 
@@ -139,8 +133,6 @@ class Chromosome {
       let temp = myGene1.splice(0, DaysDescription[k++].Period);
       myGene.push(temp);
     } while (myGene1.length > 0);
-    // console.log("------------------------->Iterting for " + myGene[0][0].name);
-    // console.log("Finished: " + this.GeneFinder.name);
     return myGene;
   }
 
@@ -155,9 +147,7 @@ function subjectCount(day, subject) {
 }
 
 function findLock(day, subject) {
-
-  if (day.find(gene => day.indexOf(gene) == subject.periodLock - 1) != undefined) return true;
-  else return false;
+  return (day.find(gene => day.indexOf(gene) == subject.periodLock - 1) != undefined) ? true : false;
 }
 
 function copy(o) {
