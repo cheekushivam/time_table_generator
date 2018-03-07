@@ -1,36 +1,16 @@
 /*jslint node: true */
 "use strict";
-const utility = require('../utility');
 class Period {
 
   constructor(sectionName, subject, teacher) {
     this.sectionName = sectionName;
     this.subject = subject;
-    this.teacher = teacher;
-
+    this.teacher = { "name": teacher.name, "subjects": teacher.subjects, "priority": teacher.priority };
+    this.Display();
   }
-
-
-  get subject() {
-    return this.subject;
+  Display() {
+    console.log("sectionName:" + this.sectionName + " subjects: " + this.subject.subjectName + " teacher:" + this.teacher.name);
   }
-  set subject(subject) {
-    this.subject = subject;
-  }
-
-  get teacher() {
-    return this.teacher;
-  }
-  set teacher(teacher) {
-    this.teacher = teacher;
-  }
-  get sectionName() {
-    return this.sectionName;
-  }
-  set sectionName(sectionName) {
-    this.sectionName = sectionName;
-  }
-
 
 }
 

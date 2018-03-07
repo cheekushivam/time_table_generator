@@ -1,25 +1,14 @@
 /*jslint node: true */
 "use strict";
 
-const Slots = require('../slot');
+const Slots = require('../Scheduler/slot');
 
 class Gene {
-  constructor(SectionName, slots) {
-    this.Periods = this.PeriodSorter(slots);
-    this.SectionName = SectionName;
+  constructor() {}
+  GeneCreator(slots, SectionName) {
+    return slots.filter(slot => slot.section == SectionName).map(period => new Object({ "name": period.section, "subject": period.subject, "teacher": period.teacher }));
+
   }
-
-  PeriodSorter(slots) {
-    let temp = [];
-    slots.forEach((slot, index) => {
-      if (slot.SectionName == this.SectionName) {
-        this.temp.push(slot);
-      }
-    });
-
-    return temp;
-  }
-
 }
 
 module.exports = Gene;

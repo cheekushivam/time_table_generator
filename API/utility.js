@@ -1,17 +1,13 @@
  module.exports = {
-   copy: (o) => {
 
-     var output, v, key;
-     output = Array.isArray(o) ? [] : {};
-     for (key in o) {
-       v = o[key];
-       output[key] = (typeof v === "object") ? copy(v) : v;
-     }
-     return output;
-   },
-   crossoverRate: 1.0,
-   mutationRate: 0.1,
+   crossoverRate: 0.78,
+   mutationRate: 0.02,
    populationSize: 1000,
-   maxGeneration: 100
+   maxGeneration: 100,
+   threshold: 0.9,
+   offSprings: 2,
+   suffler: 2,
+   max_periods_per_week: 5,
+   max_periods_per_day: 2
 
  };

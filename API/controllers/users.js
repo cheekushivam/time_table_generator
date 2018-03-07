@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const Teacher = require('../Scheduler/teacher');
 //* Password Encryption
 const saltRounds = 10;
 const JWT_KEY = "anSHul2114CraNK";
@@ -42,7 +41,6 @@ module.exports = {
         res.status(200).json({
           count: doc.length,
           data: DataMapper(doc),
-          Teacher: new Teacher(1, doc[0].firstname, ['Maths', 'Physics'], [1, 2])
         });
         res.end();
       })
