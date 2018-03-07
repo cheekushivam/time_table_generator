@@ -16,12 +16,12 @@ class Chromosome {
   getfitness() {
     //calculate fitness of a chromosomes
     let fitness = 0;
-    fitness += this.constraints_per_day(copy(this.Genes), copy(this.Sections), copy(this.DaysDescription));
+    fitness += this.constraints_per_day(this.Genes, this.Sections, this.DaysDescription);
     // Teachers clash at same period - Hard Constraint
-    fitness += this.TeacherCollision(copy(this.Genes), copy(this.totalPeriods));
+    fitness += this.TeacherCollision(this.Genes, copy(this.totalPeriods));
     //  console.log("Exit");
     fitness = 1 - (fitness / ((this.Genes.length) * this.totalPeriods));
-    console.log(fitness);
+    //  console.log(fitness);
     return fitness;
   }
   constraints_per_day(Genes, Sections, DaysDescription) {
@@ -29,15 +29,15 @@ class Chromosome {
     for (let section of Sections) {
       let myGene = this.GeneFinder(Genes, section, DaysDescription);
       // To Find that teacher priority is statisfied or not - Soft Constraint
-      for (let k = 0; k < myGene.length; k++) {
-        let day = copy(myGene[k]);
+      for (let day of myGene) {
+
         for (let [periodno, period] of day.entries()) { // Genes contains objects of Period class
           //To find Teacher Priority is met - Soft Constraint
           let teacher = period.teacher;
           fitness += this.Teacher_priority(teacher, periodno);
           // To find lab constraints - Hard Constraint
-          let Section_subjects = copy(section.subjects);
-          fitness += this.Lab_constraint(Section_subjects, day, periodno, period);
+          //let Section_subjects = ;
+          fitness += this.Lab_constraint(section.subjects, day, periodno, period);
         }
         // To find that periodLock is satisfied or not - Hard Constraint
         for (let subject of section.subjects) {
@@ -58,13 +58,11 @@ class Chromosome {
   }
   max_period_per_week(Genes, subject) {
     let fitness = 0;
-    let geniee = [];
+    let GenePool = [];
     for (let i = 0; i < Genes.length; i++) {
-      geniee = geniee.concat(Genes[i]);
+      GenePool = GenePool.concat(Genes[i]);
     }
-    let GenePool = copy(geniee);
     let maxSubjectCount = subjectCount(GenePool, subject);
-
     if (maxSubjectCount == utility.max_periods_per_week) {
       fitness += fitness_inc;
     } else if (maxSubjectCount > utility.max_periods_per_week) {
@@ -85,10 +83,13 @@ class Chromosome {
   Lab_constraint(Section_subjects, day, periodno, period) {
     let fitness = 0;
     for (let subjectg of Section_subjects) {
-      if (periodno >= day.length - 1) return fitness -= fitness_dec;
-      if (subjectg.isLab) {
-        let condition = period.subject.subjectName == subjectg.subjectName && day[periodno + 1].subject.subjectName == subjectg.subjectName;
-        fitness = (condition) ? fitness + fitness_inc : fitness -= fitness_dec;
+      if (periodno >= day.length - 1) {
+        fitness -= fitness_dec;
+      } else {
+        if (subjectg.isLab) {
+          let condition = period.subject.subjectName == subjectg.subjectName && day[periodno + 1].subject.subjectName == subjectg.subjectName;
+          fitness = (condition) ? fitness + fitness_inc : fitness -= fitness_dec;
+        }
       }
     }
     //  console.log("Finished: " + this.Lab_constraint.name);
@@ -136,7 +137,7 @@ class Chromosome {
     }
     do {
       let temp = myGene1.splice(0, DaysDescription[k++].Period);
-      myGene.push(copy(temp));
+      myGene.push(temp);
     } while (myGene1.length > 0);
     // console.log("------------------------->Iterting for " + myGene[0][0].name);
     // console.log("Finished: " + this.GeneFinder.name);
@@ -154,7 +155,9 @@ function subjectCount(day, subject) {
 }
 
 function findLock(day, subject) {
-  return day.find(gene => day.indexOf(gene) == subject.periodLock);
+
+  if (day.find(gene => day.indexOf(gene) == subject.periodLock - 1) != undefined) return true;
+  else return false;
 }
 
 function copy(o) {

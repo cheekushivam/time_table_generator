@@ -15,6 +15,7 @@ const mutationRate = Utility.mutationRate;
 const populationSize = Utility.populationSize;
 const offSprings = Utility.offSprings;
 const Suffler = Utility.Suffler;
+const threshold = Utility.threshold;
 
 class Generator {
 
@@ -91,12 +92,13 @@ class Generator {
   createNewGenerations() {
     //console.log("Entered " + this.createNewGenerations.name);
     let generation = 0; // Keeping track of Generation Number
+    let adjuster = 0;
     while (generation <= maxGenerations) {
 
       let populationcounter = 0; // Keeping Track of population Number
       let newListFitness = 0;
 
-      this.newList.concat(copy(this.firstList.splice(0, 10))); // Perform Elitism - stroring 1/10 of most fit chromosomes
+      this.newList.concat(this.firstList.splice(0, Math.floor(populationSize / 10))); // Perform Elitism - stroring 1/10 of most fit chromosomes
       while (populationcounter < populationSize) {
         console.log("Cureent Generation------------------------------------> " + generation);
         console.log("Cureent population---------------> " + populationcounter);
@@ -111,11 +113,14 @@ class Generator {
         let son = (Math.random(0, 1) < crossoverRate) ? this.crossover(Father, Mother) : Father;
         //Mutating a Gene of a son
         this.mutation(son);
-        // console.log("SON Gene");
-        // console.log(son.Genes);
-        // console.log(son.Genes[0].length);
-        // console.log(son.Genes[1].length);
-        if (son.getfitness() > 0.9 || generation >= maxGenerations) { //condition to break loop if son staisfies Constraints
+        let son_fitness = son.getfitness();
+
+        let similar_fitness = similar_offsprings(this.newList, son_fitness);
+        if (similar_fitness > populationSize / 5) {
+          adjuster += threshold / ((populationSize + 1) * similar_fitness / generation) * 15;
+        }
+        console.log("----------------------------------------------------------> current threshold: " + (threshold - adjuster) + " similars: " + similar_fitness + " curr son fit: " + son_fitness);
+        if (son_fitness > (threshold - adjuster) || generation >= maxGenerations) { //condition to break loop if son staisfies Constraints
           console.log(" ");
           console.log(" ");
           console.log(" ");
@@ -124,7 +129,7 @@ class Generator {
           console.log("optimal TimeTable According to given Parameters is found at Generation: " + generation + "  Population Number: " + populationcounter + "  with a fitness of :" + son.getfitness());
           console.log("The Time Table: ");
           console.log(son.Genes);
-          return son;
+          return son.Genes;
         }
         this.newList.push(son);
         newListFitness += son.getfitness();
@@ -144,12 +149,11 @@ class Generator {
 
   crossover(Father, Mother) {
     let index = Math.floor(Math.random(0, this.Sections.length));
-    let FatherGene1 = copy(Father.Genes[index].splice(0, Father.Genes[index].length / 2));
-    let FatherGene2 = copy(Father.Genes[index]);
+    let FatherGene1 = Father.Genes[index].splice(0, Father.Genes[index].length / 2);
+    let FatherGene2 = Father.Genes[index];
 
-    //Father.Gene[index] = copy(Mother.Gene[index].splice(0, Mother.Gene[index].length / 2));
-    let MotherGene1 = copy(Mother.Genes[index].splice(0, Mother.Genes[index].length / 2));
-    let MotherGene2 = copy(Mother.Genes[index]);
+    let MotherGene1 = Mother.Genes[index].splice(0, Mother.Genes[index].length / 2);
+    let MotherGene2 = Mother.Genes[index];
     Father.Genes[index] = FatherGene1.concat(MotherGene2);
     Mother.Genes[index] = FatherGene2.concat(MotherGene1);
     //  console.log("Finished " + this.crossover.name);
@@ -212,6 +216,10 @@ class Generator {
   doesPeriodMatch(Periods, subject) {
     return !Periods.some(period => period.subject.subjectName === subject.subjectName);
   }
+}
+
+function similar_offsprings(List, son_fitness) {
+  return List.filter(gene => Math.floor(gene.fitness) == Math.floor(son_fitness)).length;
 }
 
 function copy(o) {
