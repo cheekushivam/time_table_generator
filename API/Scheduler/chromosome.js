@@ -41,12 +41,12 @@ class Chromosome {
 
           //Max period exceed per day - Hard Constraint
 
-          //fitness = (subjectCount(day, subject) <= utility.max_periods_per_day) ? fitness + fitness_inc : fitness - fitness_dec; // checked
+          fitness = (subjectCount(day, subject) <= utility.max_periods_per_day) ? fitness + fitness_inc : fitness - fitness_dec; // checked
 
           // To find that periodLock is satisfied or not - Hard Constraint
-          // if (subject.periodLock != -1) {
-          //   fitness = (findLock(day, subject)) ? fitness + fitness_inc : fitness - fitness_dec;
-          // }
+          if (subject.periodLock != -1) {
+            fitness = (findLock(day, subject)) ? fitness + fitness_inc : fitness - fitness_dec;
+          }
 
 
           //  for (let [periodno, period] of day.entries()) { // Genes contains objects of Period class

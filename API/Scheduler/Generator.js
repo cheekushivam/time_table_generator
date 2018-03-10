@@ -7,6 +7,7 @@ const Chromosome = require('../Scheduler/chromosome');
 const Slot = require('../Scheduler/slot');
 const Period = require('../Scheduler/Period');
 var fp = require('lodash/fp');
+var _ = require('lodash/');
 //imports outside package
 const maxGenerations = Utility.maxGeneration;
 const crossoverRate = Utility.crossoverRate;
@@ -20,6 +21,7 @@ class Generator {
 
   constructor(Data) {
     this.firstList = [];
+    this.matingPool = [];
     this.newList = [];
     this.Teachers = fp.cloneDeep(Data.Teachers);
     this.Sections = fp.cloneDeep(Data.Sections);
@@ -66,7 +68,6 @@ class Generator {
   generate() {
 
     this.InitialPopulation();
-    //console.log(this.firstList[0].Genes);
     //return this.finalResultGenerator(fp.cloneDeep(this.firstList[0].Genes));
     let timetable = this.createNewGenerations();
     return timetable;
@@ -74,20 +75,12 @@ class Generator {
 
   //Creates the Very first population to start Genetic Algorithm
   InitialPopulation() {
-    console.log(Utility.max_periods_per_day);
     this.TeachertoSectionAlotter(populationSize);
 
     //sorting the population according to their fitness in descending order
-    // let avg_fit = fp.reduce(this.firstList, (sum, val) => sum + val.fitness, 0) / this.firstList.length;
-    // let sqr_diff = fp.map(this.firstList, obj => Math.sqrt((obj.fitness - avg_fit))).filter(num => !isNaN(num));
-    // let avg_sqdiff = fp.reduce(sqr_diff, (sum, val) => sum + val, 0) / this.firstList.length;
-    // let std_dev = Math.sqrt(avg_sqdiff);
-    // let S = 0;
-    // this.firstList = fp.cloneDeep(fp.map(this.firstList, obj => { obj.fitness = S + (obj.fitness - avg_fit) / 2 * std_dev; return obj; }));
-    this.firstList.sort((a, b) => b.fitness - a.fitness);
-    console.log(this.firstList[0].fitness);
-    console.log(this.firstList[populationSize - 1].fitness);
 
+    this.population_fitness_normalizer();
+    return;
   }
 
   //Creates New Generations to Evolve the TimeTable
@@ -98,75 +91,79 @@ class Generator {
     while (generation <= maxGenerations) {
 
       let populationcounter = 0; // Keeping Track of population Number
-      let newListFitness = 0;
 
-      this.newList = fp.cloneDeep(this.firstList.splice(0, Math.floor(populationSize / 10))); // Perform Elitism - stroring 1/10 of most fit chromosomes
-      //  console.log(this.newList);
-      while (populationcounter < populationSize - (populationSize / 10)) {
+      //creating a mating pool and adding best 10 percent and random 5 percent population
+      this.matingPool = fp.cloneDeep(_.take(this.firstList, this.firstList.length / 10)); // Perform Elitism - stroring 1/10 of most fit chromosomes
+      this.matingPool.concat(_.sampleSize(this.firstList, this.firstList.length / 20))
+
+      //Shuffling the chances of getting slected
+      this.matingPool = _.shuffle(this.matingPool);
+
+
+      while (populationcounter <= populationSize) {
         //console.log("Cureent Generation------------------------------------> " + generation);
         //  console.log("Cureent population---------------> " + populationcounter);
         //Selecting Parents using Stochastic universal sampling
-        //console.log(this.firstList);
         let Parents = this.SUS(offSprings);
-        //console.log(Parents);
         //Creating a new Child from Parent chromosomes
         let son = fp.cloneDeep((Math.random(0, 1) < crossoverRate) ? this.crossover(fp.cloneDeep(Parents.Father), fp.cloneDeep(Parents.Mother)) : Parents.Father);
         //Mutating a Gene of a son
         son = fp.cloneDeep((Math.random(0, 1) < mutationRate) ? this.mutation(son) : son);
-        let son_fitness = son.getfitness();
-        //if (son_fitness < 0) return ("Bhai timetable kaise banau tu chutiya hai");
+        // let similar_fitness = similar_offsprings(this.newList, son_fitness);
+        //
+        // if (similar_fitness > populationSize / 5) {
+        //   adjuster += threshold / ((populationSize + 1) * similar_fitness / (generation + 1)) * 15;
+        // }
         this.newList.push(son);
-        let similar_fitness = similar_offsprings(this.newList, son_fitness);
-
-        if (similar_fitness > populationSize / 5) {
-          adjuster += threshold / ((populationSize + 1) * similar_fitness / (generation + 1)) * 15;
-        }
-        //  console.log("----------------------------------------------------------> current threshold: " + (threshold - adjuster) + " similars: " + similar_fitness + " curr son fit: " + son_fitness);
-        if (son_fitness > (threshold - adjuster) || generation >= maxGenerations) { //condition to break loop if son staisfies Constraints
-          console.log(" ");
-          console.log(" ");
-          console.log(" ");
-          console.log(" ");
-          console.log("--------------------------------------------------------------------------");
-          console.log("optimal TimeTable According to given Parameters is found at Generation: " + generation + "  Population Number: " + populationcounter + "  with a fitness of :" + son.getfitness());
-          console.log(son.Genes[0].length);
-          console.log(son.Genes[1].length);
-          console.log("The Time Table: ");
-          let selected = this.newList.sort((a, b) => b.fitness - a.fitness);
-          let optimal = (son_fitness > selected[0].fitness) ? son.Genes : selected[0].Genes;
-          return this.finalResultGenerator(optimal);
-
-        }
-
-        newListFitness += son.getfitness();
         populationcounter++;
       }
       this.firstList = this.newList;
       this.newList = [];
-      // let avg_fit = fp.reduce(this.firstList, (sum, val) => sum + val.fitness, 0) / this.firstList.length;
-      // let sqr_diff = fp.map(this.firstList, obj => Math.sqrt((obj.fitness - avg_fit))).filter(num => !isNaN(num));
-      // let avg_sqdiff = fp.reduce(sqr_diff, (sum, val) => sum + val, 0) / this.firstList.length;
-      // let std_dev = Math.sqrt(avg_sqdiff);
-      // let S = 0;
-      // this.firstList = fp.map(this.firstList, obj => { obj.fitness = S + (obj.fitness - avg_fit) / 2 * std_dev; return obj; });
-      this.firstList.sort((a, b) => b.fitness - a.fitness);
-      //console.log("----------------------------------------------------------->max: " + this.firstList[0].fitness);
+      this.population_fitness_normalizer();
+      //  console.log("----------------------------------------------------------> current threshold: " + (threshold - adjuster) + " similars: " + similar_fitness + " curr son fit: " + son_fitness);
+
+      if (this.firstList[0].fitness > (threshold - adjuster) || generation >= maxGenerations) { //condition to break loop if son staisfies Constraints
+        console.log(" ");
+        console.log(" ");
+        console.log(" ");
+        console.log(" ");
+        console.log("--------------------------------------------------------------------------");
+        console.log("optimal TimeTable According to given Parameters is found at Generation: " + generation + "  Population Number: " + (populationcounter - 1) + "  with a fitness of :" + this.firstList[0].fitness);
+        console.log(this.firstList[0].Genes[0].length);
+        console.log(this.firstList[0].Genes[1].length);
+        console.log("The Time Table: ");
+        return this.finalResultGenerator(this.firstList[0].Genes);
+      }
       generation++;
 
     }
   }
 
+
+
+
+
+
+
+
+
   crossover(Father, Mother) {
-    let index = Math.floor(Math.random(0, this.Sections.length));
-    let FatherGene1 = Father.Genes[index].splice(0, Father.Genes[index].length / 2);
-    let FatherGene2 = Father.Genes[index];
+    let Genes = [];
 
-    let MotherGene1 = Mother.Genes[index].splice(0, Mother.Genes[index].length / 2);
-    let MotherGene2 = Mother.Genes[index];
-    Father.Genes[index] = fp.cloneDeep(fp.concat(FatherGene1, MotherGene2));
-    Mother.Genes[index] = fp.cloneDeep(fp.concat(FatherGene2, MotherGene1));
+    for (let index = 0; index < this.Sections.length; index++) {
+      let parent1 = this.matingPool[Math.floor(Math.random() * this.matingPool.length)].Genes[index];
+      let parent2 = this.matingPool[Math.floor(Math.random() * this.matingPool.length)].Genes[index];
+      let parent = parent1.concat(parent2);
+      Genes[index] = _.take(Father.Genes[index], Father.Genes[index].length / 4)
+        .concat(_.takeRight(Mother.Genes[index], Mother.Genes[index].length / 4))
+        .concat(_.sampleSize(parent, parent.length / 4));
 
-    return (Father.getfitness() > Mother.getfitness()) ? Father : Mother;
+    }
+
+
+    let son = new Chromosome(Genes, this.Sections, this.DaysDescription, this.totalPeriods);
+    return son;
+    return son;
   }
   //Mutates the son
   mutation(son) {
@@ -183,15 +180,28 @@ class Generator {
     });
     return son;
   }
+
   //Suporter function to generate random index for swapping
   suffleIndex(object) {
-    return fp.random(0, object.length);
+    return Math.floor(Math.random() * object.length);
+  }
+
+  population_fitness_normalizer() {
+    let avg_fit = _.meanBy(this.firstList, chromose => chromose.fitness);
+    let sqr_diff = _.compact(this.firstList.map(obj => Math.sqrt((obj.fitness - avg_fit))));
+    let avg_sqdiff = _.mean(sqr_diff);
+    let std_dev = Math.sqrt(avg_sqdiff);
+    let S = 0;
+    this.firstList = this.firstList.map(obj => { obj.fitness = S + (obj.fitness - avg_fit) / 2 * std_dev; return obj; });
+    this.firstList.sort((a, b) => b.fitness - a.fitness);
+    console.log(this.firstList[0].fitness);
+    console.log(this.firstList[populationSize - 1].fitness);
   }
 
   //Stochastic universal sampling for Parent Selection
   SUS(N) { // N: Number of offsprings to keep
-    //  console.log(this.newList);
-    let F = this.newList.reduce((acc, val) => acc += val.fitness, 0);
+
+    let F = this.matingPool.reduce((acc, val) => acc += val.fitness, 0);
     let P = F / N; //P: Distance between the roullete wheel pointers
     let start = Math.random(0, P);
     let pointers = [];
@@ -200,9 +210,8 @@ class Generator {
     }
 
     let Parents = this.RoulleteWheel(pointers); //Selecting Parents using Stochastic universal sampling
-    let Father = Parents[0];
-    let Mother = Parents[1];
-    //  console.log(Father);
+    let Father = Parents[Math.floor(Math.random() * Parents.length)];
+    let Mother = Parents[Math.floor(Math.random() * Parents.length)];
     return { Father: Father, Mother: Mother };
 
   }
@@ -212,23 +221,24 @@ class Generator {
     for (let P of points) {
       let i = 0;
       let currentFitness = 0;
-      while (currentFitness < P && i < this.newList.length - 1) {
-        currentFitness += this.newList[i++].fitness;
+      while (currentFitness < P && i < this.matingPool.length - 1) {
+        currentFitness += this.matingPool[i++].fitness;
         //  console.log(i);
       }
       if (i != 0) {
         --i;
       }
-      let p = fp.cloneDeep(this.newList[i]);
-      //console.log(p);
+      let p = fp.cloneDeep(this.matingPool[i]);
       keep.push(p);
     }
 
     return keep;
   }
+
   doesPeriodMatch(Periods, subject) {
     return !Periods.some(period => period.subject.subjectName === subject.subjectName);
   }
+
   finalResultGenerator(Genes) {
     let timetable = [];
 

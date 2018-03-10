@@ -2,9 +2,9 @@
 
    crossoverRate: 0.785,
    mutationRate: 0.07,
-   populationSize: 1,
-   maxGeneration: 0,
-   threshold: 31,
+   populationSize: 1000,
+   maxGeneration: 10,
+   threshold: 80,
    offSprings: 2,
    suffler: 4,
    max_periods_per_week: 6,
