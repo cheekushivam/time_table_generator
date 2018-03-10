@@ -1,13 +1,13 @@
  module.exports = {
 
-   crossoverRate: 0.78,
-   mutationRate: 0.02,
-   populationSize: 1000,
-   maxGeneration: 100,
-   threshold: 0.9,
+   crossoverRate: 0.785,
+   mutationRate: 0.07,
+   populationSize: 1,
+   maxGeneration: 0,
+   threshold: 31,
    offSprings: 2,
-   suffler: 2,
-   max_periods_per_week: 5,
+   suffler: 4,
+   max_periods_per_week: 6,
    max_periods_per_day: 2
 
  };

@@ -15,7 +15,9 @@ class Slot {
           AssignedTeachers.push(Period);
         }
       }
-      let slot = this.generateSlots(AssignedTeachers);
+      let sloterr = this.generateSlots(AssignedTeachers);
+
+      let slot = sloterr;
       slots = slots.concat(slot);
     }
     //allot slots Randomly
@@ -25,6 +27,7 @@ class Slot {
   generateSlots(AssignedTeachers) {
     return Array(this.totalPeriods).fill().map(() => {
       let index = Math.floor(Math.random() * AssignedTeachers.length);
+
       return AssignedTeachers[index];
     });
   }
