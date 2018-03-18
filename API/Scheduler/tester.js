@@ -1,376 +1,83 @@
 // Only for testing not for production use
-
 const Generator = require('../Scheduler/Generator');
+const Chromosome = require('../Scheduler/chromosome');
 const Data = require('../Scheduler/Data');
-json = {
+const Utility = require('../utility');
+const _ = require('lodash');
+let days = ["Monday", "Tuesday", "Wednesday", "Thrusday", "Friday", "Saturday"];
 
-  "Sections": [{
-      "name": "A",
-      "subjects": [{
-          "subjectName": "English",
-          "isLab": false,
-          "periodLock": 1
-        },
-        {
-          "subjectName": "Maths",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "Physics",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "Biology",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "Chemistry",
-          "isLab": false,
-          "periodLock": 6
-        },
-        {
-          "subjectName": "BiologyLAB",
-          "isLab": true,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "ChemistryLAB",
-          "isLab": true,
-          "periodLock": 6
-        },
-        {
-          "subjectName": "EnglishLab",
-          "isLab": true,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "PhysicsLab",
-          "isLab": true,
-          "periodLock": 6
-        },
 
-        {
-          "subjectName": "library",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "MondayTest",
-          "isLab": false,
-          "periodLock": -1
-        }
-      ]
-    },
-    {
-      "name": "B",
-      "subjects": [{
-          "subjectName": "C language",
-          "isLab": false,
-          "periodLock": 1
-        },
-        {
-          "subjectName": "JAVA language",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "Maths",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "Data Structures",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "Operating Systems",
-          "isLab": false,
-          "periodLock": -1
-        },
+function test(data) {
+  let timetable = new Generator(data);
+  let final_table = timetable.generate();
+  return final_table;
+}
 
-        {
-          "subjectName": "C Lab",
-          "isLab": false,
-          "periodLock": 1
-        },
-        {
-          "subjectName": "DS Lab",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "Java Lab",
-          "isLab": false,
-          "periodLock": 1
-        },
-        {
-          "subjectName": "OS Lab",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "library",
-          "isLab": false,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "MondayTest",
-          "isLab": false,
-          "periodLock": -1
-        }
-      ]
+function main(Json) {
+  let best = 0;
+  let best_table;
+  let i = 10;
+  json = Json || Utility.testCase;
+  let data = new Data().getDatafromJSON(json);
+  for (let j = 0; j < i; j++) {
+    console.log("---------------------------------------------------->test Case: " + (j + 1));
+    let table = test(data);
+    let fitness = table.fitness;
+    if (fitness > best) {
+      best = table.fitness;
+      best_table = table;
     }
-  ],
-  "Teachers": [{
-      "name": "Teacher1",
-      "subjects": [
-        "Physics",
-        "C language",
-        "OS Lab"
-      ],
-      "priority": 1
-    },
-    {
-      "name": "Teacher2",
-      "subjects": [
-        "JAVA language",
-        "CPP language",
-        "BiologyLAB",
-        "DS Lab"
-      ],
-      "priority": 3
-    },
-    {
-      "name": "Teacher3",
-      "subjects": [
-        "Maths",
-        "Data Structures",
-        "English",
-        "ChemistryLAB"
-      ],
-      "priority": 5
-    },
-    {
-      "name": "Teacher4",
-      "subjects": [
-        "Operating Systems",
-        "Chemistry",
-        "PhysicsLab"
-      ],
-      "priority": 6
-    },
-    {
-      "name": "Teacher5",
-      "subjects": [
-        "Biology",
-        "Hindi",
-        "Maths",
-        "C Lab"
+  }
+  display(best_table, data);
+  return best_table;
+}
 
-      ],
-      "priority": 7
-    },
-    {
-      "name": "Teacher6",
-      "subjects": [
-        "Operating Systems",
-        "Chemistry",
-        "Java Lab"
+function display(final_table, data) {
+  let sections = [];
+  console.log("----------------------------- Best Testing Data Starts Here------------------------------------");
+  for (let section of final_table.periods) {
+    sections[section.sectionName] = {};
+    for (let period of section.periods) {
+      if (sections[section.sectionName].hasOwnProperty(period.subject)) {
+        sections[section.sectionName][period.subject] = sections[section.sectionName][period.subject] + 1;
+      } else {
+        sections[section.sectionName][period.subject] = 1;
+      }
+    }
+  }
+  let totalLabs_per_section = [];
+  for (let section of data.Sections) {
+    totalLabs_per_section[section.name] = 0;
+    for (let subject of section.subjects) {
+      if (subject.isLab) totalLabs_per_section[section.name] += sections[section.name][subject.subjectName];
+    }
+  }
+  let period_to_compare = [];
 
-      ],
-      "priority": 0
-    },
-    {
-      "name": "Teacher7",
-      "subjects": [
-        "library",
-        "MondayTest",
-        "EnglishLab"
-      ],
-      "priority": 0
-    }
-  ],
-  "totalPeriods": 40,
-  "DaysDescription": [{
-      "Day": 0,
-      "Period": 7
-    },
-    {
-      "Day": 1,
-      "Period": 7
-    },
-    {
-      "Day": 2,
-      "Period": 7
-    },
-    {
-      "Day": 3,
-      "Period": 7
-    },
-    {
-      "Day": 4,
-      "Period": 7
-    },
-    {
-      "Day": 5,
-      "Period": 5
-    }
-  ]
+  for (let section of final_table.periods) {
+    period_to_compare.push(section.periods);
+  }
 
-};
-/*{
-  "Sections": [{
-      "name": "A",
-      "subjects": [{
-          "subjectName": "English",
-          "isLab": true,
-          "periodLock": 1
-        },
-        {
-          "subjectName": "Hindi",
-          "isLab": true,
-          "periodLock": 2
-        },
-        {
-          "subjectName": "Maths",
-          "isLab": false,
-          "periodLock": 3
-        },
-        {
-          "subjectName": "Physics",
-          "isLab": false,
-          "periodLock": 4
-        },
-        {
-          "subjectName": "Biology",
-          "isLab": true,
-          "periodLock": 5
-        },
-        {
-          "subjectName": "Chemistry",
-          "isLab": true,
-          "periodLock": -1
-        }
-      ]
-    },
-    {
-      "name": "B",
-      "subjects": [{
-          "subjectName": "C language",
-          "isLab": true,
-          "periodLock": 1
-        },
-        {
-          "subjectName": "CPP language",
-          "isLab": true,
-          "periodLock": 2
-        },
-        {
-          "subjectName": "JAVA language",
-          "isLab": true,
-          "periodLock": 3
-        },
-        {
-          "subjectName": "M1 maths",
-          "isLab": false,
-          "periodLock": 4
-        },
-        {
-          "subjectName": "Data Structures",
-          "isLab": true,
-          "periodLock": -1
-        },
-        {
-          "subjectName": "Operating Systems",
-          "isLab": true,
-          "periodLock": 6
-        }
-      ]
+  let day_count = 0;
+  let teacher_collision_count = 0;
+  console.log("Teacher Period Collieded:\n");
+  for (let j = 0; j < data.totalPeriods; j++) {
+    for (let i = 0; i < period_to_compare.length - 1; i++) {
+      if (j % data.DaysDescription.length == 0 && j != 0) {
+        day_count++;
+      }
+      if (period_to_compare[i][j].teacher === period_to_compare[i + 1][j].teacher) {
+        console.log("Teacher collided: " + period_to_compare[i][j].teacher + " Period Number: " + period_to_compare[i][j].period + " between sections: " + final_table.periods[i].sectionName + " and " + final_table.periods[i + 1].sectionName + " on: " + days[day_count] + "\n");
+        teacher_collision_count++;
+      }
     }
-  ],
-  "Teachers": [{
-      "name": "Teacher1",
-      "subjects": [
-        "Physics",
-        "C language"
-      ],
-      "priority": 1
-    },
-    {
-      "name": "Teacher",
-      "subjects": [
-        "JAVA language",
-        "CPP language"
-      ],
-      "priority": 3
-    },
-    {
-      "name": "Teacher3",
-      "subjects": [
-        "M1 maths",
-        "Data Structures",
-        "English"
-      ],
-      "priority": 5
-    },
-    {
-      "name": "Teacher4",
-      "subjects": [
-        "Operating Systems",
-        "Chemistry"
-      ],
-      "priority": 0
-    },
-    {
-      "name": "Teacher5",
-      "subjects": [
-        "Biology",
-        "Hindi",
-        "Maths"
-      ],
-      "priority": 0
-    },
-    {
-      "name": "Teacher6",
-      "subjects": [
-        "Operating Systems",
-        "Chemistry"
-      ],
-      "priority": 0
-    }
-  ],
-  "totalPeriods": 40,
-  "DaysDescription": [{
-      "Day": 0,
-      "Period": 7
-    },
-    {
-      "Day": 1,
-      "Period": 7
-    },
-    {
-      "Day": 2,
-      "Period": 7
-    },
-    {
-      "Day": 3,
-      "Period": 7
-    },
-    {
-      "Day": 4,
-      "Period": 7
-    },
-    {
-      "Day": 5,
-      "Period": 5
-    }
-  ]
-};*/
-let data = new Data();
-let timetable = new Generator(data.getDatafromJSON(json));
-let final_table = timetable.generate();
-//console.log(final_table);
+
+  }
+  console.log("Total collision: " + teacher_collision_count);
+  console.log("\nAllotted periods per subject: \n");
+  console.log(sections);
+  console.log("\nTotal Noumber of Labs per sections:\n");
+  console.log(totalLabs_per_section);
+}
+main();
+module.exports = test;
