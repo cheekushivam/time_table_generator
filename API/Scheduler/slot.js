@@ -1,5 +1,6 @@
 /*jslint node: true */
 "use strict";
+var _ = require('lodash/');
 // Have reference to class Class
 class Slot {
   constructor(Periods, Sections, totalPeriods) {
@@ -16,6 +17,8 @@ class Slot {
         }
       }
       let slot = this.generateSlots(AssignedTeachers);
+
+
       slots = slots.concat(slot);
     }
     //allot slots Randomly
@@ -23,10 +26,9 @@ class Slot {
   }
 
   generateSlots(AssignedTeachers) {
-    return Array(this.totalPeriods).fill().map(() => {
-      let index = Math.floor(Math.random() * AssignedTeachers.length);
-      return AssignedTeachers[index];
-    });
+
+    let slot = Array(this.totalPeriods).fill().map(() => AssignedTeachers[Math.floor(Math.random() * AssignedTeachers.length)]);
+    return slot;
   }
   shuffle(slots) {
     var input = slots;

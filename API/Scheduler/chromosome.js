@@ -1,9 +1,10 @@
 /*jslint node: true */
 "use strict";
-
 const utility = require('../utility');
+var _ = require('lodash/');
 let fitness_inc = 1;
-let fitness_dec = 0;
+let fitness_dec = 1;
+
 class Chromosome {
   constructor(Genes, Sections, DaysDescription, totalPeriods) {
     this.Genes = Genes;
@@ -11,156 +12,126 @@ class Chromosome {
     this.DaysDescription = DaysDescription;
     this.totalPeriods = totalPeriods;
     this.fitness = this.getfitness();
+    this.day;
+
   }
   getfitness() {
     //calculate fitness of a chromosomes
     let fitness = 0;
-    fitness += this.constraints_per_day(this.Genes, this.Sections, this.DaysDescription);
+
+    fitness += this.constraints_per_day(this.Genes, _.cloneDeep(this.Sections), _.cloneDeep(this.DaysDescription));
     // Teachers clash at same period - Hard Constraint
-    fitness += this.TeacherCollision(this.Genes, copy(this.totalPeriods));
-    fitness = 1 - (fitness / ((this.Genes.length) * this.totalPeriods));
+    fitness += this.TeacherCollision(_.cloneDeep(this.Genes), this.totalPeriods);
+
+
+
     return fitness;
   }
   constraints_per_day(Genes, Sections, DaysDescription) {
     let fitness = 0;
     for (let section of Sections) {
-      let myGene = this.GeneFinder(Genes, section, DaysDescription);
-      // To Find that teacher priority is statisfied or not - Soft Constraint
-      for (let day of myGene) {
-
-        for (let [periodno, period] of day.entries()) { // Genes contains objects of Period class
-          //To find Teacher Priority is met - Soft Constraint
-          let teacher = period.teacher;
-          fitness += this.Teacher_priority(teacher, periodno);
-          // To find lab constraints - Hard Constraint
-          fitness += this.Lab_constraint(section.subjects, day, periodno, period);
-        }
-        // To find that periodLock is satisfied or not - Hard Constraint
-        for (let subject of section.subjects) {
-
-          if (subject.periodLock != -1) {
-            fitness = (findLock(day, subject)) ? fitness + fitness_inc : fitness - fitness_dec;
-          }
+      var myGene = this.GeneFinder(Genes, section, DaysDescription);
+      for (let subject of section.subjects) {
+        //Max period exceed per week - Hard Constraint
+        let constraint = (subject.isLab) ? utility.max_periods_per_day : utility.max_periods_per_week;
+        fitness += this.subjectCount(_.flatMap(myGene), subject, myGene) == constraint ? fitness_inc : -fitness_dec;
+        let day_found = true;
+        for (let day of myGene) {
           //Max period exceed per day - Hard Constraint
-          fitness = (subjectCount(day, subject) < utility.max_periods_per_day) ? fitness + fitness_inc : fitness - fitness_dec;
+          fitness += this.subjectCount(day, subject, myGene) == utility.max_periods_per_day ? fitness_inc : -fitness_dec; // checked
+          //To find lab constraints - Hard Constraint
+          if (subject.isLab && day_found) {
+            day_found = this.Lab_constraint(subject, day, myGene);
+            fitness++;
+          }
 
-          //Max period exceed per week - Hard Constraint
-          fitness += this.max_period_per_week(Genes, subject);
+          // To find Teacher priority - Soft Constraint
+          fitness += this.Teacher_priority(day);
         }
       }
     }
     return fitness;
   }
-  max_period_per_week(Genes, subject) {
-    let fitness = 0;
-    let GenePool = [];
-    for (let i = 0; i < Genes.length; i++) {
-      GenePool = GenePool.concat(Genes[i]);
-    }
-    let maxSubjectCount = subjectCount(GenePool, subject);
-    if (maxSubjectCount == utility.max_periods_per_week) {
-      fitness += fitness_inc;
-    } else if (maxSubjectCount > utility.max_periods_per_week) {
-      fitness -= fitness_dec;
-    }
-    return fitness;
+
+  Teacher_priority(day) {
+    let matched = day.filter(period => (period.teacher.priority <= 0) ? true : period.teacher.priority - 1 == day.indexOf(period));
+    return matched.length;
   }
-  Teacher_priority(teacher, periodno) {
-    let fitness = 0;
-    if (teacher.priority == 0) return fitness + fitness_dec;
-    if (teacher.priority - 1 === periodno) {
-      fitness += fitness_inc;
-    }
-    return fitness;
-  }
-  Lab_constraint(Section_subjects, day, periodno, period) {
-    let fitness = 0;
-    for (let subjectg of Section_subjects) {
-      if (periodno >= day.length - 1) {
-        fitness -= fitness_dec;
-      } else {
-        if (subjectg.isLab) {
-          let condition = period.subject.subjectName == subjectg.subjectName && day[periodno + 1].subject.subjectName == subjectg.subjectName;
-          fitness = (condition) ? fitness + fitness_inc : fitness -= fitness_dec;
-        }
-      }
-    }
-    return fitness;
+
+  Lab_constraint(subject, day, myGene) {
+    let periodno = _.findIndex(day, period => period.subject.subjectName == subject.subjectName);
+    if (periodno == -1 || periodno == day.length - 1) return false;
+    return day[periodno + 1].subject.subjectName == subject.subjectName && (subject.periodLock <= 0) ? true : subject.periodLock == periodno && myGene.indexOf(day) == subject.day ? true : false;
+
   }
 
   TeacherCollision(Genes, totalPeriods) {
     let fitness = 0;
     for (let j = 0; j < totalPeriods; j++) {
-      let geneGroup = [];
-
-      for (let i = 0; i < Genes.length; i++) {
-
-        if (Genes[i][j] != null) {
-          geneGroup.push(Genes[i].Periods[j]);
-        }
-      }
-
-      let matched = false;
-
-      for (let k = 0; k < geneGroup.length; k++) {
-        for (let t = 0; t < geneGroup.length; t++) {
-
-          if (geneGroup[k].teacher.name == geneGroup[t].teacher.name) {
-            matched = true;
-            break;
-          }
-        }
-
-        fitness = matched ? fitness -= fitness_dec : fitness += fitness_inc;
-
+      for (let i = 0; i < Genes.length - 1; i++) {
+        if (Genes[i][j].teacher === Genes[i + 1][j].teacher) fitness++;
       }
     }
     return fitness;
   }
 
-  GeneFinder(Genes, Section, DaysDescription) {
 
-    let myGene1 = null;
-    let myGene = [];
-    let k = 0;
-    for (let i = 0; i < Genes.length; i++) {
-      if (Genes[i][0].name == Section.name) {
-        myGene1 = copy(Genes[i]);
-        break;
-      }
+  GeneFinder(Genes, Section, DaysDescription) {
+    let flattenArray = _.flatMap(Genes, gene => gene);
+    let myGene = _.filter(flattenArray, selected => selected.name == Section.name);
+    let selected = [];
+
+    while (DaysDescription.length > 0) {
+      let length = DaysDescription.shift().Period;
+      selected.push(myGene.splice(0, length));
     }
-    do {
-      let temp = myGene1.splice(0, DaysDescription[k++].Period);
-      myGene.push(temp);
-    } while (myGene1.length > 0);
-    return myGene;
+
+    return selected;
+  }
+
+
+  crossover(Parent2, Parent3, Parent4) {
+    let Parent1 = this;
+    let Genes = []
+    for (let index = 0; index < this.Sections.length; index++) {
+      let parent = Parent3.Genes[index].concat(Parent4.Genes[index]);
+      Genes[index] = _.take(Parent1.Genes[index], Parent1.Genes[index].length / 4)
+        .concat(_.sampleSize(parent, parent.length / 4))
+        .concat(_.takeRight(Parent3.Genes[index], Parent2.Genes[index].length / 4));
+    }
+
+    let son = new Chromosome(Genes, this.Sections, this.DaysDescription, this.totalPeriods);
+    return son;
+
+  }
+  //Mutates the son
+  mutation() {
+    let son = this;
+    let indexes = [];
+    for (let i = 0; i < utility.Suffler; i++) {
+      indexes.push(this.suffleIndex(son.Genes));
+    }
+    indexes.forEach((index, i) => {
+      let suffleIndex = this.suffleIndex(son.Genes[index]);
+      let tempGene = son.Gene[suffleIndex];
+      let nextSuffleIndex = this.suffleIndex(son.Gene[index]);
+      son.Genes[suffleIndex] = son.Genes[nextSuffleIndex];
+      son.Genes[nextSuffleIndex] = tempGene;
+    });
+    return son;
+  }
+  // Helper functions
+
+  //Suporter function to generate random index for swapping
+  suffleIndex(object) {
+    return Math.floor(Math.random() * object.length);
+  }
+
+  subjectCount(day, subject, myGene) {
+    return day.filter(gene => (gene.subject.subjectName == subject.subjectName && (subject.periodLock <= 0) ? true : subject.periodLock - 1 == day.indexOf(gene) && myGene.indexOf(day) == subject.day ? true : false)).length;
   }
 
   //class End
 }
-
-
-// Helper functions
-
-function subjectCount(day, subject) {
-  return day.filter(gene => gene.subject.subjectName == subject.subjectName).length;
-}
-
-function findLock(day, subject) {
-  return (day.find(gene => day.indexOf(gene) == subject.periodLock - 1) != undefined) ? true : false;
-}
-
-function copy(o) {
-
-  let output, v, key;
-  output = Array.isArray(o) ? [] : {};
-  for (key in o) {
-    v = o[key];
-    output[key] = (typeof v === "object") ? copy(v) : v;
-  }
-  return output;
-}
-
-
 
 module.exports = Chromosome;
