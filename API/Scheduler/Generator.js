@@ -182,29 +182,34 @@ class Generator {
 
   finalResultGenerator(Genes, fitness) {
     let timetable = [];
-    timetable['periods'] = [];
-    for (let gene of Genes) {
-
-      let t = 0;
-      let periods = gene.map(period => {
-        let index = gene.indexOf(period);
-
-        if ((index % this.DaysDescription[t].Period) == 0 && index != 0) {
-          t++;
-
-        }
-        if (t >= this.DaysDescription.length) t--;
-        let periodno = (index % this.DaysDescription[t].Period) + 1;
-
-        return new Object({ "period": periodno, "subject": period.subject.subjectName, "teacher": period.teacher.name });
-      });
-
-      timetable.periods.push({ "sectionName": gene[0].name, "periods": periods });
-    }
-
-    //  console.log(timetable);
+    timetable['Sections'] = this.period_assigner(Genes, _.cloneDeep(this.DaysDescription));
     timetable['fitness'] = fitness;
+    console.log(timetable);
     return timetable;
+  }
+  period_assigner(Genes, DaysDescription) {
+    let days = ["Monday", "Tuesday", "Wednesday", "Thrusday", "Friday", "Saturday"];
+    let formatted_Genes = [];
+    for (let Gene of Genes) {
+      let gene = _.cloneDeep(Gene);
+      let daysDescription = _.cloneDeep(DaysDescription);
+      let temp = [];
+      while (daysDescription.length > 0) {
+        let length = daysDescription.shift().Period;
+        temp.push(gene.splice(0, length));
+      }
+      for (let day of temp) {
+        temp[temp.indexOf(day)] = new Object({
+          "day": days[temp.indexOf(day)],
+          "periods": day.map(period => new Object({ "period": day.indexOf(period) + 1, "subject": period.subject.subjectName, "teacher": period.teacher.name }))
+        });
+
+      }
+
+      temp = _.flatMap(temp, period => period);
+      formatted_Genes.push({ "sectionName": Gene[0].name, "timetable": temp });
+    }
+    return formatted_Genes;
   }
 }
 

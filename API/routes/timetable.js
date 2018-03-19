@@ -15,7 +15,7 @@ router.post('/', (req, res, next) => {
   //let final_table = timetable.generate();
   let final_table = tester.main(req.body);
   res.status(200).json({
-    timetable: final_table
+    timetable: final_table.periods
   });
 });
 

@@ -2,13 +2,14 @@
 
    crossoverRate: 0.60,
    mutationRate: 0.040,
-   populationSize: 400,
+   populationSize: 500,
    maxGeneration: 5,
-   threshold: 0.87,
+   threshold: 0.72,
    offSprings: 4,
    suffler: 2,
    max_periods_per_week: 6,
    max_periods_per_day: 2,
+   max_tests: 1,
    testCase: {
      "Sections": [{
          "name": "A",
@@ -251,11 +252,11 @@
        },
        {
          "Day": 4,
-         "Period": 7
+         "Period": 5
        },
        {
          "Day": 5,
-         "Period": 5
+         "Period": 7
        }
      ]
    }
