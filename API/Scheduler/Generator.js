@@ -30,35 +30,36 @@ class Generator {
 
   TeachertoSectionAlotter(populationCounter) {
     //Create Slots
-    if (populationCounter-- <= 0) return 1;
-    //generate Slots
-    for (var section of this.Sections) {
-      for (var subject of section.subjects) {
-        for (var teacher of this.Teachers) {
+    for (let i = populationCounter; i >= 0; i--) {
+      if (populationCounter-- <= 0) return 1;
+      //generate Slots
+      for (var section of this.Sections) {
+        for (var subject of section.subjects) {
+          for (var teacher of this.Teachers) {
 
-          //console.log(subject);
-          var Tsubjects = teacher.subjects;
+            //console.log(subject);
+            var Tsubjects = teacher.subjects;
 
-          var condition = Tsubjects.includes(subject.subjectName) && this.doesPeriodMatch(this.Periods, subject.subjectName, section);
-          if (condition) {
-            this.Periods.push({
-              "section": section.name,
-              "subject": subject,
-              "teacher": new Object({ "name": teacher.name, "subjects": teacher.subjects, "priority": teacher.priority })
-            }); //period object tha
+            var condition = Tsubjects.includes(subject.subjectName) && this.doesPeriodMatch(this.Periods, subject.subjectName, section);
+            if (condition) {
+              this.Periods.push({
+                "section": section.name,
+                "subject": subject,
+                "teacher": new Object({ "name": teacher.name, "subjects": teacher.subjects, "priority": teacher.priority })
+              }); //period object tha
+
+            }
 
           }
-
         }
       }
-    }
-    //Generating a slot ,creating Genes and by those making a new chromose and pushing it to the list
-    let slot = new Slot(this.Periods, this.Sections, this.totalPeriods);
-    let myGene = new Gene();
-    let Genes = this.Sections.map(section => myGene.GeneCreator(slot.slots, section.name)); // Gene obkject tha
-    this.firstList.push(new Chromosome(Genes, this.Sections, this.DaysDescription, this.totalPeriods));
+      //Generating a slot ,creating Genes and by those making a new chromose and pushing it to the list
+      let slot = new Slot(this.Periods, this.Sections, this.totalPeriods);
+      let myGene = new Gene();
+      let Genes = this.Sections.map(section => myGene.GeneCreator(slot.slots, section.name)); // Gene obkject tha
+      this.firstList.push(new Chromosome(Genes, this.Sections, this.DaysDescription, this.totalPeriods));
 
-    this.TeachertoSectionAlotter(populationCounter);
+    }
   }
   // Main method which start the process
   generate() {
@@ -88,7 +89,7 @@ class Generator {
       let populationcounter = 0; // Keeping Track of population Number
 
       //creating a mating pool and adding best 10 percent and random 5 percent population
-      this.newList = _.cloneDeep(_.take(this.firstList, this.firstList.length / 5)); // Perform Elitism - stroring 1/10 of most fit chromosomes
+      this.newList = _.cloneDeep(_.take(this.firstList, Math.round(this.firstList.length / 5))); // Perform Elitism - stroring 1/10 of most fit chromosomes
 
 
       //Shuffling the chances of getting slected
@@ -135,8 +136,16 @@ class Generator {
 
   population_fitness_normalizer() {
     console.log(this.firstList.length);
-    let total_fit = _.sumBy(this.firstList, chromose => chromose.fitness);
-    this.firstList = this.firstList.map(obj => { obj.fitness = obj.fitness / total_fit * 100; return obj; });
+    // let total_fit = _.sumBy(this.firstList, chromose => chromose.fitness);
+    let min_fit = _.minBy(this.firstList, chromose => chromose.fitness).fitness;
+    let max_fit = _.maxBy(this.firstList, chromose => chromose.fitness).fitness;
+    this.firstList = this.firstList.map(obj => {
+      let diff = max_fit - min_fit;
+      if (diff == 0) obj.fitness = 1 / this.firstList.length;
+      else
+        obj.fitness = (obj.fitness - min_fit) / diff; //(obj.fitness / total_fit) * 100; //
+      return obj;
+    });
     this.firstList.sort((a, b) => b.fitness - a.fitness);
     console.log(this.firstList[0].fitness);
     console.log(this.firstList[populationSize - 1].fitness);
@@ -145,7 +154,7 @@ class Generator {
   //Stochastic universal sampling for Parent Selection
   SUS(N) { // N: Number of offsprings to keep
 
-    let F = this.firstList.reduce((acc, val) => acc += val.fitness, 0);
+    let F = this.newList.reduce((acc, val) => acc += val.fitness, 0);
     let P = F / N; //P: Distance between the roullete wheel pointers
     let start = Math.random(0, P);
     let pointers = [];
@@ -161,14 +170,14 @@ class Generator {
     for (let P of points) {
       let i = 0;
       let currentFitness = 0;
-      while (currentFitness < P && i < this.firstList.length - 1) {
-        currentFitness += this.firstList[i++].fitness;
+      while (currentFitness < P && i < this.newList.length - 1) {
+        currentFitness += this.newList[i++].fitness;
         //  console.log(i);
       }
       if (i != 0) {
         --i;
       }
-      let p = _.cloneDeep(this.firstList[i]);
+      let p = _.cloneDeep(this.newList[i]);
       keep.push(p);
     }
 
@@ -184,7 +193,6 @@ class Generator {
     let timetable = [];
     timetable['Sections'] = this.period_assigner(Genes, _.cloneDeep(this.DaysDescription));
     timetable['fitness'] = fitness;
-    console.log(timetable);
     return timetable;
   }
   period_assigner(Genes, DaysDescription) {

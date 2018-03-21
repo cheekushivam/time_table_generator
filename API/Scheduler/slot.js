@@ -22,6 +22,7 @@ class Slot {
       slots = slots.concat(slot);
     }
     //allot slots Randomly
+
     return this.shuffle(slots);
   }
 

@@ -55,39 +55,50 @@ module.exports = {
         if (subject.isLab) totalLabs_per_section[section.name] += sections[section.name][subject.subjectName];
       }
     }
+
     let period_to_compare = [];
 
+    for (let section of final_table.Sections) {
+      let temp = [];
+      for (let day of section.timetable)
+        temp.push(day.periods);
+      period_to_compare.push(_.flatMap(temp, object => object));
+    }
+
+
+    let day_count = 0;
+    let teacher_collision_count = 0;
+    let day = _.cloneDeep(data.DaysDescription);
+    let length = day.shift().Period;
+    console.log("Teacher Period Collieded:\n");
+    for (let j = 0; j < data.totalPeriods; j++) {
+      for (let i = 0; i < period_to_compare.length - 1; i++) {
+        for (let k = i + 1; k < period_to_compare.length; k++) {
+          if (j == length - 1 && day.length != 0) {
+            length += day.shift().Period;
+            day_count++;
+          }
+          if (period_to_compare[i][j].teacher === period_to_compare[k][j].teacher) {
+            console.log("Teacher collided: " + period_to_compare[i][j].teacher + " Period Number: " + period_to_compare[i][j].period + " between sections: " + final_table.Sections[i].sectionName + " and " + final_table.Sections[k].sectionName + " on: " + days[day_count] + "\n");
+            teacher_collision_count++;
+          }
+        }
+      }
+    }
+    // let days = { "Monday": {}, "Tuesday": {}, "Wednesday": {}, "Thrusday": {}, "Friday": {}, "Saturday": {} };
+    // let periods = [];
     // for (let section of final_table.Sections) {
-    //   period_to_compare.push(section.periods);
-    // }
-    //
-    // let day_count = 0;
-    // let teacher_collision_count = 0;
-    // console.log("Teacher Period Collieded:\n");
-    // for (let j = 0; j < data.totalPeriods; j++) {
-    //   for (let i = 0; i < period_to_compare.length - 1; i++) {
-    //     if (j % data.DaysDescription.length == 0 && j != 0) {
-    //       day_count++;
-    //     }
-    //     if (period_to_compare[i][j].teacher === period_to_compare[i + 1][j].teacher) {
-    //       console.log("Teacher collided: " + period_to_compare[i][j].teacher + " Period Number: " + period_to_compare[i][j].period + " between sections: " + final_table.periods[i].sectionName + " and " + final_table.periods[i + 1].sectionName + " on: " + days[day_count] + "\n");
-    //       teacher_collision_count++;
+    //   for (let day of section.timetable) {
+    //     for (let period of day.periods) {
+    //       //days[day.day][period.period] = period;
+    //       periods.push({ 'day': day.day, 'value': period });
     //     }
     //   }
-    //
     // }
-    let days = ["Monday": {}, "Tuesday": {}, "Wednesday": {}, "Thrusday": {}, "Friday": {}, "Saturday": {}];
-    let filtered_data_by_day = [];
-    filtered_data_by_day.push(_.filter(final_table.Sections, object => object.day));
-    console.log(filtered_data_by_day);
-    //  for (let section of final_table.Sections) {
-    //for (let day of section.timetable) {
-    //  for (let period of day.periods) {
+    // for (let period of periods) {
+    //   days[period.day] = _.groupBy(periods.filter(object => object.day == period.day).map(object => object.value), 'period');
+    // }
 
-
-    //  }
-    //  }
-    //    }
     console.log("Total collision: " + teacher_collision_count);
     console.log("\nAllotted periods per subject: \n");
     console.log(sections);
@@ -95,4 +106,4 @@ module.exports = {
     console.log(totalLabs_per_section);
   }
 }
-module.exports.main();
+//module.exports.main();

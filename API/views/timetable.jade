@@ -1,0 +1,26 @@
+doctype html
+html
+  head
+      title= title 
+  body 
+    div
+      h1 Awesome bro
+       for  section in timetable.Sections
+        li #{section.sectionName}
+        for day in section.timetable
+           div
+             h1=day.day
+             table 
+                  thead
+                    tr
+                      th subject
+                      th Teacher
+                      th Peroid
+                  tbody    
+                     for period in day.periods 
+                       tr  
+                        td  #{period.subject} 
+                        td  #{period.teacher} 
+                        td  #{period.period}
+         
+    
