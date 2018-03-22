@@ -89,12 +89,12 @@ class Generator {
       let populationcounter = 0; // Keeping Track of population Number
 
       //creating a mating pool and adding best 10 percent and random 5 percent population
-      this.newList = _.cloneDeep(_.take(this.firstList, Math.round(this.firstList.length / 5))); // Perform Elitism - stroring 1/10 of most fit chromosomes
+      this.newList = _.cloneDeep(_.take(this.firstList, Math.round(this.firstList.length / 10)).concat(_.sampleSize(this.firstList, Math.round(this.firstList.length / 5)))); // Perform Elitism - stroring 1/10 of most fit chromosomes
 
 
       //Shuffling the chances of getting slected
-      this.firstList = _.shuffle(this.firstList);
-      while (populationcounter < populationSize - (populationSize / 5)) {
+      //    this.firstList = _.shuffle(this.firstList);
+      while (populationcounter < populationSize - (populationSize / 30)) {
         //console.log("Cureent Generation------------------------------------> " + generation);
         //  console.log("Cureent population---------------> " + populationcounter);
         //Selecting Parents using Stochastic universal sampling
@@ -105,9 +105,9 @@ class Generator {
         let Parent4 = Parents[3];
 
         //Creating a new Child from Parent chromosomes
-        let son = _.cloneDeep((Math.random(0, 1) < crossoverRate) ? Parent1.crossover(Parent2, Parent3, Parent4) : Parents[Math.floor(Math.random() * Parents.length)]);
+        let son = _.cloneDeep((Math.random() < crossoverRate) ? Parent1.crossover(Parent2, Parent3, Parent4) : Parents[Math.floor(Math.random() * Parents.length)]);
         //Mutating a Gene of a son
-        son = _.cloneDeep((Math.random(0, 1) < mutationRate) ? son.mutation() : son);
+        son = _.cloneDeep((Math.random() < mutationRate) ? son.mutation() : son);
 
         this.newList.push(son);
         populationcounter++;
@@ -124,8 +124,6 @@ class Generator {
         console.log(" ");
         console.log("--------------------------------------------------------------------------");
         console.log("optimal TimeTable According to given Parameters is found at Generation: " + generation + "  Population Number: " + (populationcounter - 1) + "  with a fitness of :" + this.firstList[0].fitness);
-        console.log(this.firstList[0].Genes[0].length);
-        console.log(this.firstList[0].Genes[1].length);
         return this.finalResultGenerator(this.firstList[0].Genes, this.firstList[0].fitness);
       }
       generation++;

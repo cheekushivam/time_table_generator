@@ -3,7 +3,7 @@
 const utility = require('../utility');
 var _ = require('lodash/');
 let fitness_inc = 1;
-let fitness_dec = 1;
+let fitness_dec = 4;
 
 class Chromosome {
   constructor(Genes, Sections, DaysDescription, totalPeriods) {
@@ -17,11 +17,11 @@ class Chromosome {
     //calculate fitness of a chromosomes
     let fitness = 0;
 
+
+
     fitness += this.constraints_per_day(this.Genes, _.cloneDeep(this.Sections), _.cloneDeep(this.DaysDescription));
     // Teachers clash at same period - Hard Constraint
-
     fitness += this.TeacherCollision(_.cloneDeep(this.Genes), this.totalPeriods);
-
 
 
     return fitness;
@@ -33,20 +33,11 @@ class Chromosome {
       for (let subject of section.subjects) {
         //Max period exceed per week - Hard Constraint
         let constraint = (subject.isLab) ? utility.max_periods_per_day : utility.max_periods_per_week;
-        fitness += this.subjectCount_per_week(_.flatMap(myGene), subject) == constraint ? fitness_inc : (subject.isLab) ? -fitness_dec * 4 : -fitness_dec;
+        fitness += this.subjectCount_per_week(_.flatMap(myGene), subject) <= constraint ? fitness_inc : (subject.isLab) ? -fitness_dec * 4 : -fitness_dec;
         let day_found = true;
         for (let day of myGene) {
-
-          //To find lab constraints - Hard Constraint
-          // if (subject.isLab && day_found) {
-          //   day_found = this.Lab_constraint(subject, day, myGene);
-          //   if (!day_found) fitness++;
-          // }
-
           //Max period exceed per day - Hard Constraint
-          fitness += this.subjectCount(day, subject, myGene) <= utility.max_periods_per_day ? fitness_inc : -fitness_dec; // checked
-          // To find Teacher priority - Soft Constraint
-          fitness += this.Teacher_priority(day);
+          fitness += this.subjectCount(day, subject, myGene) <= utility.max_periods_per_day ? fitness_inc : -fitness_dec * 4; // checked
         }
       }
     }
@@ -70,7 +61,7 @@ class Chromosome {
     for (let j = 0; j < totalPeriods; j++) {
       for (let i = 0; i < Genes.length - 1; i++) {
         for (let k = i + 1; k < Genes.length; k++) {
-          if (Genes[i][j].teacher == Genes[k][j].teacher) fitness -= fitness_dec;
+          if (Genes[i][j].teacher == Genes[k][j].teacher) fitness -= fitness_dec * 4;
         }
       }
     }
@@ -109,16 +100,17 @@ class Chromosome {
   mutation() {
     let son = this;
     let indexes = [];
-    for (let i = 0; i < utility.shuffler; i++) {
+    for (let i = 0; i <= Math.floor(Math.random() * son.Genes.length); i++) {
       indexes.push(this.suffleIndex(son.Genes));
     }
     indexes.forEach((index, i) => {
-
-      let suffleIndex = this.suffleIndex(son.Genes[index]);
-      let tempGene = son.Genes[index][suffleIndex];
-      let nextSuffleIndex = this.suffleIndex(son.Genes[index]);
-      son.Genes[index][suffleIndex] = son.Genes[index][nextSuffleIndex];
-      son.Genes[index][nextSuffleIndex] = tempGene;
+      for (let i = 0; i < utility.shuffler; i++) {
+        let suffleIndex = this.suffleIndex(son.Genes[index]);
+        let tempGene = son.Genes[index][suffleIndex];
+        let nextSuffleIndex = this.suffleIndex(son.Genes[index]);
+        son.Genes[index][suffleIndex] = _.cloneDeep(son.Genes[index][nextSuffleIndex]);
+        son.Genes[index][nextSuffleIndex] = _.cloneDeep(tempGene);
+      }
     });
     return son;
   }
@@ -133,7 +125,7 @@ class Chromosome {
     return day.filter(gene => (gene.subject.subjectName == subject.subjectName)).length;
   }
   subjectCount(day, subject, myGene) {
-    return day.filter(gene => (gene.subject.subjectName == subject.subjectName && (subject.periodLock <= 0) ? true : subject.periodLock - 1 == day.indexOf(gene) && myGene.indexOf(day) == subject.day - 1 ? true : false)).length;
+    return day.filter(gene => (gene.subject.subjectName == subject.subjectName)); // && (subject.periodLock <= 0) ? true : subject.periodLock - 1 == day.indexOf(gene) && myGene.indexOf(day) == subject.day - 1 ? true : false)).length;
   }
 
   //class End

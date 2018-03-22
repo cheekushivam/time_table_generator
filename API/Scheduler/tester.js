@@ -14,7 +14,7 @@ module.exports = {
   },
 
   main: function(Json) {
-    let best = 0;
+    let best = 100;
     let best_table;
 
     json = Json || Utility.testCase;
@@ -22,14 +22,24 @@ module.exports = {
     for (let j = 0; j < Utility.max_tests; j++) {
       console.log("---------------------------------------------------->test Case: " + (j + 1));
       let table = this.test(data);
-      let fitness = table.fitness;
-      if (fitness > best) {
-        best = table.fitness;
+      let fitness = this.TeacherCollision(table, data);
+      if (fitness < best) {
+        best = fitness;
         best_table = table;
       }
     }
-    this.display(best_table, data);
 
+    //  for (let section of best_table.Sections) {
+    // for (let day of best_table.Sections[0].timetable) {
+    //   console.log(day);
+    // }
+    //    }
+    //  console.log("----------------------------- ------------------------------------");
+    this.Delete_duplicate_period_per_day(best_table, data);
+    //console.log("----------------------------- ------------------------------------");
+    this.Delete_duplicate_period_per_week(best_table, data);
+    //console.log("----------------------------- ------------------------------------");
+    this.display(best_table, data);
     return best_table;
   },
 
@@ -40,6 +50,7 @@ module.exports = {
       sections[section.sectionName] = {};
       for (let day of section.timetable) {
         for (let period of day.periods) {
+          if (period == "Free") continue;
           if (sections[section.sectionName].hasOwnProperty(period.subject)) {
             sections[section.sectionName][period.subject] = sections[section.sectionName][period.subject] + 1;
           } else {
@@ -48,14 +59,22 @@ module.exports = {
         }
       }
     }
+    this.TeacherCollision(final_table, data);
     let totalLabs_per_section = [];
     for (let section of data.Sections) {
       totalLabs_per_section[section.name] = 0;
       for (let subject of section.subjects) {
+
         if (subject.isLab) totalLabs_per_section[section.name] += sections[section.name][subject.subjectName];
       }
     }
+    console.log("\nAllotted periods per subject: \n");
+    console.log(sections);
+    console.log("\nTotal Noumber of Labs per sections:\n");
+    console.log(totalLabs_per_section);
+  },
 
+  TeacherCollision: function(final_table, data) {
     let period_to_compare = [];
 
     for (let section of final_table.Sections) {
@@ -64,8 +83,6 @@ module.exports = {
         temp.push(day.periods);
       period_to_compare.push(_.flatMap(temp, object => object));
     }
-
-
     let day_count = 0;
     let teacher_collision_count = 0;
     let day = _.cloneDeep(data.DaysDescription);
@@ -78,32 +95,85 @@ module.exports = {
             length += day.shift().Period;
             day_count++;
           }
-          if (period_to_compare[i][j].teacher === period_to_compare[k][j].teacher) {
+          if (period_to_compare[i][j] != "Free" && period_to_compare[i][j].teacher === period_to_compare[k][j].teacher) {
             console.log("Teacher collided: " + period_to_compare[i][j].teacher + " Period Number: " + period_to_compare[i][j].period + " between sections: " + final_table.Sections[i].sectionName + " and " + final_table.Sections[k].sectionName + " on: " + days[day_count] + "\n");
+
             teacher_collision_count++;
           }
         }
       }
     }
-    // let days = { "Monday": {}, "Tuesday": {}, "Wednesday": {}, "Thrusday": {}, "Friday": {}, "Saturday": {} };
-    // let periods = [];
-    // for (let section of final_table.Sections) {
-    //   for (let day of section.timetable) {
-    //     for (let period of day.periods) {
-    //       //days[day.day][period.period] = period;
-    //       periods.push({ 'day': day.day, 'value': period });
-    //     }
-    //   }
+    console.log("Total collision: " + teacher_collision_count);
+    return teacher_collision_count;
+  },
+  Delete_duplicate_period_per_day: function(table, data) {
+
+    for (let section of table.Sections) {
+
+      for (let day of section.timetable) {
+        let Day = {};
+        for (let period of day.periods) {
+          if (Day.hasOwnProperty(period.subject)) {
+            Day[period.subject] = Day[period.subject] + 1;
+          } else {
+            Day[period.subject] = 1;
+          }
+          if (Day[period.subject] > Utility.max_periods_per_day) {
+            day.periods[day.periods.indexOf(period)] = "Free";
+
+          }
+        }
+      }
+    }
+    //    for (let section of table.Sections) {
+    // for (let day of table.Sections[0].timetable) {
+    //   console.log(day);
     // }
-    // for (let period of periods) {
-    //   days[period.day] = _.groupBy(periods.filter(object => object.day == period.day).map(object => object.value), 'period');
+    //  }
+  },
+  Delete_duplicate_period_per_week: function(table, data) {
+    let period_to_compare = [];
+    for (let section of table.Sections) {
+      let temp = [];
+      for (let day of section.timetable)
+        temp.push(day.periods);
+      period_to_compare.push(_.flatMap(temp, object => object));
+    }
+
+
+    let Sections = data.Sections;
+    let k = 0;
+    for (let section of Sections) {
+      let sections = {};
+      let subjects = section.subjects;
+      let section_compare = table.Sections[k].timetable;
+
+      for (let subject of subjects) {
+        let constraint = subject.isLab ? Utility.max_periods_per_day : Utility.max_periods_per_week;
+        for (let day of section_compare) {
+          for (let period of day.periods) {
+            if (period == "Free") continue;
+            if (period.subject == subject.subjectName && sections[period.subject] > constraint) {
+              //console.log(sections[period.subject] + "---" + period.subject);
+              day.periods[day.periods.indexOf(period)] = "Free";
+            }
+
+            if (sections.hasOwnProperty(period.subject) && period.subject == subject.subjectName) {
+              sections[period.subject] = sections[period.subject] + 1;
+            } else {
+              sections[period.subject] = 1;
+            }
+
+          }
+        }
+      }
+      k++;
+
+    }
+    // for (let day of table.Sections[0].timetable) {
+    //   console.log(day);
     // }
 
-    console.log("Total collision: " + teacher_collision_count);
-    console.log("\nAllotted periods per subject: \n");
-    console.log(sections);
-    console.log("\nTotal Noumber of Labs per sections:\n");
-    console.log(totalLabs_per_section);
   }
 }
-//module.exports.main();
+module.exports.main();

@@ -1,15 +1,15 @@
  module.exports = {
 
    crossoverRate: 0.7,
-   mutationRate: 0.4,
-   populationSize: 1000,
+   mutationRate: 0.04,
+   populationSize: 500,
    maxGeneration: 10,
    threshold: 0.99,
    offSprings: 4,
-   shuffler: 10,
+   shuffler: 15,
    max_periods_per_week: 6,
    max_periods_per_day: 2,
-   max_tests: 1,
+   max_tests: 3,
    testCase: {
      "Sections": [{
          "name": "CSE-8th",
@@ -242,13 +242,7 @@
          "name": "RK",
          "subjects": [
            "Cyber Security",
-           "Data Structures"
-         ],
-         "priority": 6
-       },
-       {
-         "name": "RK Lab",
-         "subjects": [
+           "Data Structures",
            "OS Lab",
            "DS Lab"
          ],
@@ -258,13 +252,7 @@
          "name": "Neha Taori",
          "subjects": [
            "TCP",
-           "IWT"
-         ],
-         "priority": 0
-       },
-       {
-         "name": "Neha Taori Lab",
-         "subjects": [
+           "IWT",
            "Software Technology Lab",
            "GUI Lab"
          ],
@@ -273,32 +261,19 @@
        {
          "name": "Vijaya Chaturdevi",
          "subjects": [
-           "SEPM"
-         ],
-         "priority": 0
-       },
-       {
-         "name": "Vijaya Chaturdevi Lab",
-         "subjects": [
-
+           "SEPM",
            "SEPM Lab"
          ],
          "priority": 0
        },
+
        {
          "name": "Anupama Sharma",
          "subjects": [
            "Artificial Intelligence",
-           "Computer Graphics"
-         ],
-         "priority": 0
-       },
-       {
-         "name": "Anupama Sharma Lab",
-         "subjects": [
+           "Computer Graphics",
            "CG Lab",
            "AI Lab"
-
          ],
          "priority": 0
        },
@@ -306,17 +281,9 @@
          "name": "Vibha Pandey",
          "subjects": [
            "Operating Systems",
-           "IMT"
-         ],
-         "priority": 0
-       },
-       {
-         "name": "Vibha Pandey Lab",
-         "subjects": [
-
+           "IMT",
            "AJP Lab",
            "Network Security Lab"
-
          ],
          "priority": 0
        },
@@ -324,13 +291,7 @@
          "name": "Govind Singh",
          "subjects": [
            "Computer Networks",
-           "OOP"
-         ],
-         "priority": 0
-       },
-       {
-         "name": "Govind Singh Lab",
-         "subjects": [
+           "OOP",
            "OOP Lab",
            "CN Lab"
          ],
@@ -340,17 +301,12 @@
          "name": "Vikas Singh",
          "subjects": [
            "CSA",
-           "ERP"
+           "ERP",
+           "CHM Lab"
          ],
          "priority": 2
        },
-       {
-         "name": "Vikas Singh Lab",
-         "subjects": [
-           "CHM Lab"
-         ],
-         "priority": 1
-       },
+
        {
          "name": "Anamika Jain",
          "subjects": [
@@ -360,15 +316,9 @@
          "priority": 1
        },
        {
-         "name": "library Teacher",
+         "name": "Free Teacher",
          "subjects": [
-           "library"
-         ],
-         "priority": -1
-       },
-       {
-         "name": "Monday_Test Teacher",
-         "subjects": [
+           "library",
            "MondayTest"
          ],
          "priority": -1
