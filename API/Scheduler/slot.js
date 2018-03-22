@@ -27,8 +27,15 @@ class Slot {
   }
 
   generateSlots(AssignedTeachers) {
-
-    let slot = Array(this.totalPeriods).fill().map(() => AssignedTeachers[Math.floor(Math.random() * AssignedTeachers.length)]);
+    let slot = Array(this.totalPeriods).fill("Free");
+    while (slot.filter(period => period == "Free").length > 0) {
+      for (let period of AssignedTeachers) {
+        let index = Math.floor(Math.random() * slot.length);
+        if (slot[index] == "Free")
+          slot[index] = period;
+      }
+    }
+    // let slot = Array(this.totalPeriods).fill().map(() => AssignedTeachers[Math.floor(Math.random() * AssignedTeachers.length)]);
     return slot;
   }
   shuffle(slots) {

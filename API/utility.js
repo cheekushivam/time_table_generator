@@ -9,7 +9,7 @@
    shuffler: 15,
    max_periods_per_week: 6,
    max_periods_per_day: 2,
-   max_tests: 3,
+   max_tests: 1,
    testCase: {
      "Sections": [{
          "name": "CSE-8th",
@@ -64,13 +64,13 @@
 
            {
              "subjectName": "library",
-             "isLab": false,
+             "isLab": true,
              "periodLock": 7,
              "day": 1
            },
            {
              "subjectName": "MondayTest",
-             "isLab": false,
+             "isLab": true,
              "periodLock": 1,
              "day": 1
            }
@@ -140,13 +140,13 @@
            },
            {
              "subjectName": "library",
-             "isLab": false,
+             "isLab": true,
              "periodLock": 7,
              "day": 0
            },
            {
              "subjectName": "MondayTest",
-             "isLab": false,
+             "isLab": true,
              "periodLock": 1,
              "day": 0
            }
@@ -217,13 +217,13 @@
            },
            {
              "subjectName": "library",
-             "isLab": false,
+             "isLab": true,
              "periodLock": 7,
              "day": 0
            },
            {
              "subjectName": "MondayTest",
-             "isLab": false,
+             "isLab": true,
              "periodLock": 1,
              "day": 0
            }

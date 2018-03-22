@@ -39,6 +39,7 @@ module.exports = {
     //console.log("----------------------------- ------------------------------------");
     this.Delete_duplicate_period_per_week(best_table, data);
     //console.log("----------------------------- ------------------------------------");
+    this.periodLock_and_lab_constraint(best_table, data);
     this.display(best_table, data);
     return best_table;
   },
@@ -140,7 +141,6 @@ module.exports = {
       period_to_compare.push(_.flatMap(temp, object => object));
     }
 
-
     let Sections = data.Sections;
     let k = 0;
     for (let section of Sections) {
@@ -168,12 +168,73 @@ module.exports = {
         }
       }
       k++;
-
     }
     // for (let day of table.Sections[0].timetable) {
     //   console.log(day);
     // }
+  },
+  periodLock_and_lab_constraint: function(table, data) {
 
+
+
+    for (let section of data.Sections) {
+      let Buffer = [];
+      let section_compare = table.Sections[data.Sections.indexOf(section)].timetable;
+      for (let subject of section.subjects) {
+        let period_pos_satisfied = false;
+        if (subject.periodLock <= 0 || subject.day <= 0) continue;
+        for (let day of section_compare) {
+          for (let period of day.periods) {
+            if (period == "Free") continue;
+            let shouldLock = (subject.periodLock - 1) == day.periods.indexOf(period) && (subject.day - 1) == section_compare.indexOf(day);
+
+            if (shouldLock) period_pos_satisfied = true;
+            if (period.subject == subject.subjectName && !shouldLock) {
+              Buffer.push(period);
+              day.periods[day.periods.indexOf(period)] = "Free";
+            }
+          }
+        }
+        console.log(Buffer);
+        //  If subject satisfies a position and is not a lab
+        console.log(period_pos_satisfied);
+        if (!subject.isLab && period_pos_satisfied) {
+
+          Buffer = Buffer.filter(period => period.subject != subject.subjectName);
+        } else if (!subject.isLab) { // If subject doesn't satisfies a positionk and is not a lab
+          let curr = section_compare[subject.day - 1].periods[subject.periodLock - 1];
+          if (curr != "Free") Buffer.push(curr);
+          section_compare[subject.day - 1].periods[subject.periodLock - 1] = _.remove(Buffer, period => period.subject == subject.subjectName)[0];
+        } else if (period_pos_satisfied) {
+          if (subject.periodLock != section_compare[subject.day - 1].length) {
+            section_compare[subject.day - 1].periods[subject.periodLock] = _.remove(Buffer, period => period.subject == subject.subjectName);
+            console.log("yeh wala");
+            console.log(section_compare[subject.day - 1].periods[subject.periodLock]);
+          } else {
+            let curr = section_compare[subject.day - 1].periods[subject.periodLock - 2];
+            Buffer.push(curr);
+            section_compare[subject.day - 1].periods[subject.periodLock - 2] = _.remove(Buffer, period => period.subject == subject.subjectName);
+          }
+        } else {
+          if (subject.periodLock != section_compare[subject.day - 1].length) {
+            let to_be_inserted = _.remove(Buffer, period => period.subject == subject.subjectName);
+            let i = 0;
+            while (i++ < to_be_inserted.length) {
+              section_compare[subject.day - 1].periods[subject.periodLock - 1 + i] = to_be_inserted[i];
+            }
+          } else {
+            let to_be_inserted = _.remove(Buffer, period => period.subject == subject.subjectName);
+            let i = 0;
+            while (i++ < to_be_inserted.length) {
+              let curr = section_compare[subject.day - 1].periods[subject.periodLock - 1 - i];
+              Buffer.push(curr);
+              section_compare[subject.day - 1].periods[subject.periodLock - 1 - i] = to_be_inserted[i];
+            }
+
+          }
+        }
+      }
+    }
   }
 }
-module.exports.main();
+// module.exports.main();
