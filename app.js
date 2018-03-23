@@ -6,14 +6,15 @@ const bodyParser = require('body-parser');
 const userRoutes = require('./API/routes/users');
 const timetableRoutes = require('./API/routes/timetable');
 const DataBase = require('./api/controllers/database');
-
-
+const path = require('path');
+app.set('views', path.join(__dirname, 'API/views'));
+app.set('view engine', 'jade');
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
   extended: false
 }));
 app.use(bodyParser.json());
-
+app.use(express.static(path.join(__dirname, 'public')));
 //To prevent CORS Errors
 
 app.use((req, res, next) => {
