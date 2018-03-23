@@ -203,27 +203,30 @@ module.exports = {
             let insert_periods = this.find_periods(Buffer, subject);
             console.log(insert_periods);
             while (insert_periods.length < Utility.max_periods_per_day) insert_periods.push(insert_periods[0]);
-            while (i++ < insert_periods.length) {
+
+            while (i < insert_periods.length) {
+              console.log(i);
               console.log("aaya");
               let curr = section_compare[subject.day - 1].periods[subject.periodLock - 1 + i];
               to_be_alloted.push(_.cloneDeep(curr));
               section_compare[subject.day - 1].periods[subject.periodLock - 1 + i] = insert_periods[i];
+              console.log(section_compare[subject.day - 1].periods[subject.periodLock - 1 + i]);
+              i++;
             }
+
+          } else {
+            let insert_periods = this.find_periods(Buffer, subject);
+            while (insert_periods.length < Utility.max_periods_per_day) insert_periods.push(insert_periods[0]);
+            let i = 0;
+            while (i < insert_periods.length) {
+              let curr = section_compare[subject.day - 1].periods[subject.periodLock - 1 - i];
+              if (curr != "Free") to_be_alloted.push(_.cloneDeep(curr));
+              section_compare[subject.day - 1].periods[subject.periodLock - 1 - i] = insert_periods[i];
+              i++;
+            }
+
           }
         }
-        //   } else {
-        //     let insert_periods = find_periods(Buffer,subject);;
-        //     while (insert_periods.length < Utility.max_periods_per_day) insert_periods.push(insert_periods[0]);
-        //     let i = 0;
-        //     while (i++ < insert_periods.length) {
-        //       let curr = section_compare[subject.day - 1].periods[subject.periodLock - 1 - i];
-        //       if (curr != "Free") to_be_alloted.push(curr);
-        //       to_be_alloted.push(curr);
-        //       section_compare[subject.day - 1].periods[subject.periodLock - 1 - i] = insert_periods[i];
-        //     }
-        //
-        //   }
-        // }
       }
     }
   },
