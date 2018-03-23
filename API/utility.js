@@ -22,8 +22,8 @@
            {
              "subjectName": "IWT",
              "isLab": false,
-             "periodLock": -1,
-             "day": -1
+             "periodLock": 1,
+             "day": 2
            },
            {
              "subjectName": "Data Mining and Warehousing",
@@ -64,13 +64,13 @@
 
            {
              "subjectName": "library",
-             "isLab": true,
+             "isLab": false,
              "periodLock": 7,
              "day": 1
            },
            {
              "subjectName": "MondayTest",
-             "isLab": true,
+             "isLab": false,
              "periodLock": 1,
              "day": 1
            }
@@ -140,15 +140,15 @@
            },
            {
              "subjectName": "library",
-             "isLab": true,
+             "isLab": false,
              "periodLock": 7,
-             "day": 0
+             "day": 1
            },
            {
              "subjectName": "MondayTest",
-             "isLab": true,
+             "isLab": false,
              "periodLock": 1,
-             "day": 0
+             "day": 1
            }
          ]
        },
@@ -217,15 +217,15 @@
            },
            {
              "subjectName": "library",
-             "isLab": true,
+             "isLab": false,
              "periodLock": 7,
-             "day": 0
+             "day": 1
            },
            {
              "subjectName": "MondayTest",
-             "isLab": true,
+             "isLab": false,
              "periodLock": 1,
-             "day": 0
+             "day": 1
            }
          ]
        }
