@@ -13,7 +13,7 @@ router.post('/', (req, res, next) => {
   // let data = new Data();
   // let timetable = new Generator(data.getDatafromJSON(req.body));
   //let final_table = timetable.generate();
-  let final_table = tester.main(req.body);
+  let final_table = new tester(req.body);
   // res.status(200).json({
   //   timetable: final_table.periods
   // });

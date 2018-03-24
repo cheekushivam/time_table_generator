@@ -94,7 +94,7 @@ class Generator {
 
       //Shuffling the chances of getting slected
       //    this.firstList = _.shuffle(this.firstList);
-      while (populationcounter < populationSize - (populationSize / 30)) {
+      while (populationcounter < populationSize - ((populationSize / 10) + (populationSize / 5))) {
         //console.log("Cureent Generation------------------------------------> " + generation);
         //  console.log("Cureent population---------------> " + populationcounter);
         //Selecting Parents using Stochastic universal sampling
@@ -145,8 +145,8 @@ class Generator {
       return obj;
     });
     this.firstList.sort((a, b) => b.fitness - a.fitness);
-    console.log(this.firstList[0].fitness);
-    console.log(this.firstList[populationSize - 1].fitness);
+    //console.log(this.firstList[0].fitness);
+    //  console.log(this.firstList[populationSize - 1].fitness);
   }
 
   //Stochastic universal sampling for Parent Selection

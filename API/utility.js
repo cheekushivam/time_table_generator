@@ -142,7 +142,7 @@
              "subjectName": "library",
              "isLab": false,
              "periodLock": 7,
-             "day": 1
+             "day": 3
            },
            {
              "subjectName": "MondayTest",
@@ -219,7 +219,7 @@
              "subjectName": "library",
              "isLab": false,
              "periodLock": 7,
-             "day": 1
+             "day": 2
            },
            {
              "subjectName": "MondayTest",
@@ -351,7 +351,8 @@
          "Day": 5,
          "Period": 5
        }
-     ]
+     ],
+     "lab_periods_after": 4
    }
 
  };

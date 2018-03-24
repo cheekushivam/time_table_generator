@@ -11,7 +11,7 @@ class Data {
     let subjects = JSON.Sections[0].subjects;
     let Sections = JSON.Sections.map(section => new Object({ "name": section.name, "subjects": section.subjects }));
 
-    return { Teachers: Teachers, Sections: Sections, DaysDescription: JSON.DaysDescription, totalPeriods: JSON.totalPeriods };
+    return { Teachers: Teachers, Sections: Sections, DaysDescription: JSON.DaysDescription, totalPeriods: JSON.totalPeriods, lab_periods_after: JSON.lab_periods_after };
   }
 }
 module.exports = Data;
