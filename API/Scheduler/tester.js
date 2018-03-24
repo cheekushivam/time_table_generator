@@ -36,7 +36,7 @@ class Tester {
     // }
     //    }
     //  console.log("----------------------------- ------------------------------------");
-    this.display();
+
     this.Delete_duplicate_period_per_day();
     //console.log("----------------------------- ------------------------------------");
     this.Delete_duplicate_period_per_week();
@@ -182,7 +182,7 @@ class Tester {
           for (let period of day.periods) {
             if (period == "Free") continue;
             if (period.subject == subject.subjectName) {
-              Buffer.push(_.cloneDeep(period));
+              Buffer.push(period);
               day.periods[day.periods.indexOf(period)] = "Free";
             }
           }
@@ -193,7 +193,7 @@ class Tester {
 
           if (curr != "Free") to_be_alloted.push(_.cloneDeep(curr));
           let found = this.find_periods(Buffer, subject);
-          if (found == undefined || found.length == 0) found = this.find_periods(to_be_alloted, subject);
+          //  if (found == undefined || found.length == 0) found = this.find_periods(to_be_alloted, subject);
           section_compare[subject.day - 1].periods[subject.periodLock - 1] = found[0];
         }
         //periodLock management for Lab periods
@@ -201,7 +201,7 @@ class Tester {
           if (subject.periodLock < section_compare[subject.day - 1].periods.length) {
             let i = 0;
             let insert_periods = this.find_periods(Buffer, subject);
-            if (insert_periods == undefined || insert_periods.length == 0) insert_periods = this.find_periods(to_be_alloted, subject);
+            //    if (insert_periods == undefined || insert_periods.length == 0) insert_periods = this.find_periods(to_be_alloted, subject);
             while (insert_periods.length < Utility.max_periods_per_day) insert_periods.push(insert_periods[0]);
             while (i < insert_periods.length) {
               let curr = section_compare[subject.day - 1].periods[subject.periodLock - 1 + i];
@@ -212,7 +212,7 @@ class Tester {
 
           } else {
             let insert_periods = this.find_periods(Buffer, subject);
-            if (insert_periods.length == 0) insert_periods = this.find_periods(to_be_alloted, subject);
+            //if (insert_periods.length == 0) insert_periods = this.find_periods(to_be_alloted, subject);
             while (insert_periods.length < Utility.max_periods_per_day) insert_periods.push(insert_periods[0]);
             let i = insert_periods.length;
             while (i > 0) {
@@ -241,7 +241,7 @@ class Tester {
           for (let period of day.periods) {
             if (period == "Free") continue;
             if (period.subject == subject.subjectName) {
-              Buffer.push(_.cloneDeep(period));
+              Buffer.push(period);
               day.periods[day.periods.indexOf(period)] = "Free";
             }
           }
@@ -264,9 +264,8 @@ class Tester {
         for (let day of total_free_periods) {
 
           let Day = _.find(section_compare, obj => obj.day == day.day).periods;
-          //  console.log(Day);
+
           for (let i = this.data.lab_periods_after + 1; i < Day.length - 1; i++) {
-            //console.log(Day[i]);
             let curr = Day[i] == "Free";
             let back = Day[i - 1] == "Free";
             let front = Day[i + 1] == "Free";
@@ -280,32 +279,44 @@ class Tester {
                   Period = this.find_periods(to_be_allocated, subject)[0];
 
                 }
-
-                Day[i] = _.cloneDeep(Period);
-
+                Day[i] = Period;
                 if (front) {
                   Day[i + 1] = Day[i];
-                  if (back) Day[i - 1] = _.cloneDeep(temp);
+                  if (back) Day[i - 1] = temp;
 
                 } else if (back) {
                   Day[i - 1] = Day[i];
-                  if (front) Day[i + 1] = _.cloneDeep(temp);
-                } else to_be_allocated.push(_.cloneDeep(temp));
+                  if (front) Day[i + 1] = temp;
+                } else to_be_allocated.push(temp);
                 continue change_subject;
               }
             } else {
               let Period = this.find_periods(Buffer, subject)[0];
               if (!Period) {
                 Period = this.find_periods(to_be_allocated, subject)[0];
-
               }
 
-              Day[i] = _.cloneDeep(Period);
+              Day[i] = Period;
               if (front) Day[i + 1] = Day[i];
               else
               if (back) Day[i - 1] = Day[i];
+              else if (!front && !back) {
 
+                let Subject = _.find(section.subjects, subject => subject.subjectName == Day[i + 1].subject);
+                let condition = Subject.periodLock > 0 && Subject.day > 0;
+                if (!condition) {
+                  to_be_allocated.push(_.cloneDeep(Day[i + 1]));
+                  Day[i + 1] = Day[i];
+                } else {
+                  let Subject = _.find(section.subjects, subject => subject.subjectName == Day[i - 1].subject);
+                  let condition = Subject.periodLock > 0 && Subject.day > 0;
+                  if (!condition) {
+                    to_be_allocated.push(_.cloneDeep(Day[i - 1]));
+                    Day[i - 1] = Day[i];
+                  }
+                }
 
+              }
               continue change_subject;
             }
           }
@@ -315,7 +326,7 @@ class Tester {
   }
 
   find_periods(Buffer, subject) {
-    return _.cloneDeep(_.remove(Buffer, period => period.subject == subject.subjectName));
+    return _.remove(Buffer, period => period.subject == subject.subjectName);
   }
   find_lone_periods() {
     let periods_remaining = [];
@@ -347,8 +358,8 @@ class Tester {
 }
 module.exports = Tester;
 
-
-for (let i = 0; i < 100; i++) {
-  console.log("------------------------------------>testing count: " + i);
-  new Tester();
-}
+//
+// for (let i = 0; i < 100; i++) {
+//   console.log("------------------------------------>testing count: " + i);
+//   new Tester();
+// }
