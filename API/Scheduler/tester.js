@@ -33,7 +33,7 @@ class Tester {
     }
 
     this.best_table = new Handler(this.best_table, this.data);
-    // this.display();
+    this.display();
 
     console.log("End");
     return this.best_table;
@@ -108,4 +108,4 @@ class Tester {
 module.exports = Tester;
 
 
-new Tester();
+// new Tester();
