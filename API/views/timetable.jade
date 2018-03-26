@@ -4,9 +4,9 @@ html
       title= title 
   body 
     div
-      h1 Awesome bro
+    
        for  section in timetable.Sections
-        li #{section.sectionName}
+        h3 #{section.sectionName}
         for day in section.timetable
            div
              h1=day.day
